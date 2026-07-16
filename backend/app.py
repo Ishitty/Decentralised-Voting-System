@@ -16,18 +16,39 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+JWT_SECRET = os.getenv("JWT_SECRET")
+ADMIN_PRIVATE_KEY = os.getenv("ADMIN_PRIVATE_KEY")
+ADMIN_ACCOUNT = os.getenv("ADMIN_ACCOUNT")
+CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS")
+RPC_URL = os.getenv("RPC_URL")
+
+ABI_PATH = os.path.abspath(
+    os.path.join(BASE_DIR, "..", "artifacts", "ManageElection.json")
+)
+
+required_settings = {
+    "JWT_SECRET": JWT_SECRET,
+    "ADMIN_PRIVATE_KEY": ADMIN_PRIVATE_KEY,
+    "ADMIN_ACCOUNT": ADMIN_ACCOUNT,
+    "CONTRACT_ADDRESS": CONTRACT_ADDRESS,
+    "RPC_URL": RPC_URL,
+}
+
+missing_settings = [
+    name for name, value in required_settings.items() if not value
+]
+
+if missing_settings:
+    raise RuntimeError(
+        "Missing environment variables: "
+        + ", ".join(missing_settings)
+    )
+
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 from flask_cors import CORS
 from web3 import Web3
 
-from config.secret import (
-    ABI_PATH,
-    ADMIN_ACCOUNT,
-    ADMIN_PRIVATE_KEY,
-    CONTRACT_ADDRESS,
-    JWT_SECRET,
-    RPC_URL,
-)
+
 from face_utils import compare_faces, encode_face, hash_encoding
 from models import Admin, SessionLocal, Voter
 
@@ -36,7 +57,6 @@ from models import Admin, SessionLocal, Voter
 # APPLICATION PATHS
 # ================================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 SESSION_FILE = os.path.join(BASE_DIR, "voting_session.json")
