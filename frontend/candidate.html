@@ -1,0 +1,624 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate List</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+.candidate-item{
+ display:flex;justify-content:space-between;
+ padding:10px 15px;border:1px solid #ddd;border-radius:6px;
+ margin-bottom:10px;background:#f8faff;font-size:18px;
+ transition:.2s;align-items:center;
+}
+.candidate-item:hover{background:#e9f3ff}
+.vote-badge{
+ background:#0a3475;color:white;padding:4px 10px;border-radius:6px;
+ font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="strip"></div>
+
+<header class="gov-header">
+ <div style="display:flex;align-items:center;gap:10px;">
+    <img class="ashoka" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="" width="45">
+    <div><b>Vote Rakshak Portal</b><br><span style="font-size:13px;">Registered Candidates</span></div>
+ </div>
+
+ <nav class="top-links">
+    <a href="/">Home</a>
+    <a href="/voter">Vote</a>
+    <a href="/results">Results</a>
+ </nav>
+</header>
+
+<div class="container">
+<div class="card">
+<h2 style="text-align:center;color:#0a3475;margin-bottom:15px;">Candidates List</h2>
+
+<div id="list"></div>
+
+<button class="btn" style="margin-top:20px" onclick="location.href='voter'">
+   Vote Now
+</button>
+
+</div>
+</div>
+
+<script>
+async function load(){
+ const res = await fetch("/candidates");
+ const data = await res.json();
+
+ const box = document.getElementById("list");
+ box.innerHTML="";
+
+ data.forEach(c=>{
+   box.innerHTML += `
+     <div class="candidate-item">
+        <span><b>${c.id}. ${c.name}</b></span>
+        <span class="vote-badge">${c.votes} Votes</span>
+     </div>
+   `;
+ });
+}
+load();
+</script>
+
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate List</title>
+<link rel="stylesheet" href="style.css"> -->
+
+<!-- <style> -->
+<!-- .candidate-item{
+ display:flex;justify-content:space-between;
+ padding:10px 15px;border:1px solid #ddd;border-radius:6px;
+ margin-bottom:10px;background:#f8faff;font-size:18px;
+ transition:.2s;align-items:center;
+}
+.candidate-item:hover{background:#e9f3ff}
+.vote-badge{
+ background:#0a3475;color:white;padding:4px 10px;border-radius:6px;
+ font-size:14px;
+} -->
+<!-- </style> -->
+<!--  </head>  -->
+
+<!-- <body> -->
+
+<!-- <div class="strip"></div> -->
+
+<!-- <header class="gov-header"> -->
+ <!-- <div style="display:flex;align-items:center;gap:10px;">
+    <img class="ashoka" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="" width="45">
+    <div><b>Vote Rakshak Portal</b><br><span style="font-size:13px;">Registered Candidates</span></div>
+ </div> -->
+
+ <!-- <nav class="top-links">
+    <a href="#" onclick="goHome()">Home</a>
+    <a href="#" onclick="goVoter()">Vote</a>
+    <a href="#" onclick="goResults()">Results</a>
+ </nav>
+</header> -->
+
+<!-- <div class="container">
+<div class="card">
+<h2 style="text-align:center;color:#0a3475;margin-bottom:15px;">Candidates List</h2>
+
+<div id="list"></div>
+
+<button class="btn" style="margin-top:20px" onclick="goVoter()">
+   Vote Now
+</button> -->
+
+<!-- <button class="btn" style="margin-top:10px;background:#444" onclick="goDashboard()">
+   Back to Dashboard
+</button> -->
+<!-- <div class="card">
+  <hr>
+
+<h3 style="margin-top:15px;">Add Candidate</h3>
+
+<input type="text" id="candidateName" placeholder="Enter candidate name" 
+style="width:100%;padding:10px;margin:10px 0;">
+
+<button type="button" class="btn" onclick="addCandidate()">
+  Add Candidate
+</button>
+
+<hr>
+</div>
+</div>
+</div> -->
+
+<!-- <script> -->
+
+<!-- //   async function addCandidate() {
+//   const name = document.getElementById("candidateName").value;
+
+//   if (!name) {
+//     alert("Enter candidate name");
+//     return;
+//   }
+
+//   const token = localStorage.getItem("token");
+
+//   const res = await fetch("/admin/add_candidate", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": "Bearer " + token
+//     },
+//     body: JSON.stringify({ name: name })
+//   });
+
+//   const data = await res.json();
+
+//   if (res.ok) {
+//     alert("Candidate added successfully");
+//     load(); // refresh list
+//   } else {
+//     alert(data.error || "Error adding candidate");
+//   }
+// }
+
+async function addCandidate() {
+  const name = document.getElementById("candidateName").value;
+
+  console.log("Button clicked");  // 👈 DEBUG
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch("/admin/add_candidate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      name: name
+    })
+  });
+
+  const data = await res.json();
+  console.log("Response:", data);
+}
+
+// ✅ Get token from localStorage
+const token = localStorage.getItem("token");
+
+// ❗ If no token → block access
+if (!token) {
+  alert("Login required");
+  window.location.href = "/admin";
+}
+
+// Navigation functions
+function goDashboard(){
+  window.location.href = "/admin-dashboard?token=" + token;
+}
+
+function goVoter(){
+  // window.location.href = "/voter?token=" + token;
+    window.location.href = "/";
+
+}
+
+function goResults(){
+  window.location.href = "/results?token=" + token;
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+
+// Load candidates
+async function load(){
+ const res = await fetch("/candidates");
+ const data = await res.json();
+
+ const box = document.getElementById("list");
+ box.innerHTML="";
+
+ data.forEach(c=>{
+   box.innerHTML += `
+     <div class="candidate-item">
+        <span><b>${c.id}. ${c.name}</b></span>
+        <span class="vote-badge">${c.votes} Votes</span>
+     </div>
+   `;
+ });
+}
+load(); -->
+
+<!-- </script>
+
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidates — Vote Rakshak</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --navy:#0d1f4e;
+    --navy-mid:#162766;
+    --navy-dark:#091540;
+    --accent-orange:#e07b22;
+    --accent-green:#2ecc71;
+    --bg:#eef1f8;
+    --card:#ffffff;
+    --text:#1a1a2e;
+    --muted:#6b7280;
+    --border:#d1d9e6;
+  }
+
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;display:flex;flex-direction:column;
+  }
+
+  /* STRIP */
+  .accent-strip{
+    height:4px;
+    background:linear-gradient(90deg,var(--accent-orange) 0%,var(--accent-orange) 30%,var(--accent-green) 30%,var(--accent-green) 100%);
+  }
+
+  /* HEADER */
+  .gov-header{
+    background:var(--navy);color:#fff;
+    padding:0 32px;height:64px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 2px 12px rgba(0,0,0,.35);
+  }
+  .header-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;cursor:pointer}
+  .header-brand img{width:38px;height:38px;object-fit:contain;filter:brightness(0) invert(1)}
+  .brand-text .title{font-size:1rem;font-weight:700;letter-spacing:.03em;line-height:1.2}
+  .brand-text .subtitle{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase}
+
+  .header-right{display:flex;align-items:center}
+  .header-nav{display:flex;align-items:center;gap:4px}
+  .header-nav a{
+    color:rgba(255,255,255,.7);text-decoration:none;
+    font-size:.8rem;font-weight:500;padding:6px 14px;
+    border-radius:5px;transition:background .2s,color .2s;cursor:pointer;
+  }
+  .header-nav a:hover{background:rgba(255,255,255,.1);color:#fff}
+  .header-nav a.active{background:rgba(255,255,255,.15);color:#fff}
+
+  .status-pill{
+    display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;
+    letter-spacing:.06em;color:var(--accent-green);text-transform:uppercase;
+    margin-left:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,.15);
+  }
+  .status-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent-green);box-shadow:0 0 6px var(--accent-green);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* BREADCRUMB */
+  .breadcrumb-bar{
+    background:var(--navy-mid);padding:0 32px;height:36px;
+    display:flex;align-items:center;
+  }
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:.75rem;color:rgba(255,255,255,.55)}
+  .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;cursor:pointer}
+  .breadcrumb a:hover{color:#fff}
+  .breadcrumb .sep{color:rgba(255,255,255,.25)}
+  .breadcrumb .current{color:rgba(255,255,255,.9);font-weight:500}
+
+  /* MAIN */
+  .main{flex:1;padding:28px 16px 60px;max-width:720px;margin:0 auto;width:100%}
+
+  /* PAGE TITLE ROW */
+  .page-title-row{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:20px;flex-wrap:wrap;gap:10px;
+  }
+  .page-title{font-size:1.3rem;font-weight:800;color:var(--navy)}
+  .cand-count-badge{
+    background:#fff;border:1.5px solid var(--border);border-radius:6px;
+    padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--muted);
+    letter-spacing:.04em;
+  }
+
+  /* CARD */
+  .card{
+    background:var(--card);border-radius:10px;
+    border:1px solid var(--border);
+    box-shadow:0 4px 20px rgba(0,0,0,.07);
+    overflow:hidden;margin-bottom:20px;
+  }
+  .card-header{
+    padding:16px 24px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .card-header-left{display:flex;align-items:center;gap:10px}
+  .card-icon{font-size:1.1rem}
+  .card-title{font-size:.95rem;font-weight:700;color:var(--navy)}
+  .card-body{padding:20px 24px}
+
+  /* LIVE BADGE */
+  .live-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    background:#dcfce7;color:#166534;
+    font-size:.65rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:3px 9px;border-radius:20px;
+  }
+  .live-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;animation:pulse 1.5s infinite}
+
+  /* CANDIDATE ITEMS */
+  .candidate-list{display:flex;flex-direction:column;gap:0}
+
+  .candidate-item{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 24px;border-bottom:1px solid var(--border);
+    transition:background .15s;
+  }
+  .candidate-item:last-child{border-bottom:none}
+  .candidate-item:hover{background:#f8faff}
+
+  .rank-badge{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.8rem;font-weight:700;
+    background:var(--bg);color:var(--muted);border:1.5px solid var(--border);
+  }
+  .rank-badge.first {background:#fef3c7;border-color:#fbbf24;color:#92400e}
+  .rank-badge.second{background:#f1f5f9;border-color:#94a3b8;color:#475569}
+  .rank-badge.third {background:#fdf4e8;border-color:#d97706;color:#92400e}
+
+  .cand-avatar{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.95rem;font-weight:700;letter-spacing:.02em;
+  }
+
+  .cand-info{flex:1}
+  .cand-name{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:2px}
+  .cand-id{font-size:.7rem;color:var(--muted)}
+
+  .vote-wrap{text-align:right}
+  .vote-count{
+    background:var(--navy);color:#fff;
+    font-size:.72rem;font-weight:700;
+    padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:4px;
+  }
+  .vote-bar-wrap{width:80px;background:var(--border);border-radius:4px;height:5px;margin-left:auto}
+  .vote-bar{height:5px;border-radius:4px;background:var(--navy);transition:width .6s ease}
+
+  /* EMPTY */
+  .empty-state{
+    text-align:center;padding:32px;color:var(--muted);font-size:.88rem;
+    border:1.5px dashed var(--border);border-radius:8px;
+  }
+
+  /* CTA */
+  .btn-primary{
+    width:100%;padding:13px;border:none;border-radius:6px;
+    background:var(--navy);color:#fff;font-size:.88rem;font-weight:700;
+    letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .1s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    position:relative;overflow:hidden;
+  }
+  .btn-primary::before{
+    content:'';position:absolute;left:0;bottom:0;width:4px;height:100%;
+    background:linear-gradient(180deg,var(--accent-orange),var(--accent-green));
+  }
+  .btn-primary:hover{background:var(--navy-dark)}
+  .btn-primary:active{transform:scale(.99)}
+
+  /* NOTICE */
+  .notice{
+    display:flex;align-items:flex-start;gap:8px;
+    background:#f8faff;border:1px solid #dce6f5;border-radius:6px;
+    padding:10px 14px;font-size:.75rem;color:var(--muted);margin-top:4px;
+  }
+
+  /* LAST UPDATE */
+  .last-update{font-size:.7rem;color:var(--muted);text-align:right;margin-top:10px}
+
+  /* FOOTER */
+  footer{
+    background:var(--navy);color:rgba(255,255,255,.45);
+    font-size:.72rem;padding:14px 32px;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:8px;
+  }
+  footer a{color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
+  footer a:hover{color:rgba(255,255,255,.85)}
+  .footer-links{display:flex;gap:16px}
+
+  @media(max-width:560px){
+    .gov-header,.breadcrumb-bar{padding:0 16px}
+    .main{padding:16px 12px 40px}
+    footer{padding:12px 16px;flex-direction:column;gap:6px}
+    .vote-bar-wrap{width:56px}
+  }
+</style>
+</head>
+<body>
+
+<!-- STRIP -->
+<div class="accent-strip"></div>
+
+<!-- HEADER -->
+<header class="gov-header">
+  <div class="header-brand" onclick="goHome()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="Emblem">
+    <div class="brand-text">
+      <div class="title">Vote Rakshak</div>
+      <div class="subtitle">Blockchain-Secured Electoral System &nbsp;·&nbsp; Registered Candidates</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <nav class="header-nav">
+      <a onclick="goHome()">Home</a>
+      <a onclick="goVoter()">Vote</a>
+      <a class="active">Candidates</a>
+      <a onclick="goResults()">Results</a>
+    </nav>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Live
+    </div>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <nav class="breadcrumb">
+    <a onclick="goHome()">Home</a>
+    <span class="sep">›</span>
+    <span class="current">Candidates</span>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- PAGE TITLE -->
+  <div class="page-title-row">
+    <div class="page-title">Registered Candidates</div>
+    <div class="cand-count-badge" id="countBadge">Loading…</div>
+  </div>
+
+  <!-- CANDIDATE LIST CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-icon">🏛️</span>
+        <span class="card-title">Candidate List</span>
+      </div>
+      <span class="live-badge"><span class="live-dot"></span>Live</span>
+    </div>
+    <div class="candidate-list" id="list">
+      <div style="padding:28px 24px">
+        <div class="empty-state">Loading candidates…</div>
+      </div>
+    </div>
+    <div style="padding:6px 24px 14px">
+      <p class="last-update" id="lastUpdate">–</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="card">
+    <div class="card-body" style="padding:20px 24px">
+      <button class="btn-primary" onclick="goVoter()">
+        → CAST YOUR VOTE NOW
+      </button>
+      <div class="notice" style="margin-top:12px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Each registered voter may cast exactly one vote. Candidates can only be added or removed by the Election Administrator.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 Vote Rakshak &nbsp;·&nbsp; Government of India</span>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Help</a>
+  </div>
+</footer>
+
+<script>
+// ── NAVIGATION ──
+function goHome()   { window.location.href = "/"; }
+function goVoter()  { window.location.href = "/voter"; }
+function goResults(){ window.location.href = "/results"; }
+
+// ── RANK CLASS ──
+// const rankClass = ["first","second","third"];
+// const rankLabel = ["🥇","🥈","🥉"];
+
+// ── LOAD CANDIDATES ──
+async function load(){
+  try {
+    const res  = await fetch("/candidates");
+    const data = await res.json();
+    const total = data.reduce((a,c) => a + c.votes, 0) || 1;
+
+    document.getElementById("countBadge").textContent =
+      data.length + (data.length === 1 ? " Candidate" : " Candidates");
+      const sorted = [...data];
+
+    // const sorted = [...data].sort((a,b) => b.votes - a.votes);
+    const box = document.getElementById("list");
+
+    if(!sorted.length){
+      box.innerHTML = '<div style="padding:28px 24px"><div class="empty-state">No candidates registered yet.</div></div>';
+      return;
+    }
+
+    box.innerHTML = sorted.map((c, i) => {
+      const initials = c.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+      const pct = Math.round((c.votes / total) * 100);
+      return `
+        <div class="candidate-item">
+         <div class="rank-badge">${i + 1}</div>
+          <div class="cand-avatar">${initials}</div>
+          <div class="cand-info">
+            <div class="cand-name">${c.name}</div>
+            <div class="cand-id">Candidate ID: ${c.id}</div>
+          </div>
+        </div>`;
+    }).join("");
+
+    document.getElementById("lastUpdate").textContent =
+      "Last updated: " + new Date().toLocaleTimeString();
+
+  } catch(e){
+    document.getElementById("list").innerHTML =
+      '<div style="padding:28px 24px"><div class="empty-state">Failed to load candidates. Please refresh.</div></div>';
+  }
+}
+
+load();
+setInterval(load, 4000);
+</script>
+</body>
+</html>

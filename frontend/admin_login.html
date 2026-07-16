@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Login — Vote Rakshak</title>
+
+  <!-- MediaPipe FaceMesh -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: #EEF1F7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Tricolor strips ── */
+    .strip-top {
+      height: 5px;
+      background: linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%);
+    }
+
+    .strip-bot {
+      height: 3px;
+      background: linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%);
+      margin-top: auto;
+    }
+
+    /* ── Header ── */
+    .gov-header {
+      background: #0B2545;
+      padding: 0 2.5rem;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #1A3A6E;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ashoka {
+      width: 46px;
+      height: 46px;
+      background: #1A3A6E;
+      border-radius: 50%;
+      border: 1.5px solid #4A7BC8;
+      object-fit: contain;
+      padding: 3px;
+    }
+
+    .header-brand b {
+      display: block;
+      font-family: 'EB Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #F0F4FF;
+      letter-spacing: 0.04em;
+    }
+
+    .header-brand span {
+      font-size: 10.5px;
+      color: #8BA8D4;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #138808;
+    }
+
+    .status-txt {
+      font-size: 11px;
+      color: #8BA8D4;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Subheader breadcrumb ── */
+    .subheader {
+      background: #122E5A;
+      padding: 0 2.5rem;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #1A3A6E;
+    }
+
+    .breadcrumb {
+      font-size: 11px;
+      color: #8BA8D4;
+      letter-spacing: 0.06em;
+    }
+
+    .breadcrumb span {
+      color: #4A7BC8;
+      margin: 0 5px;
+    }
+
+    /* ── Page background grid ── */
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 38px, #0B2545 38px, #0B2545 39px),
+        repeating-linear-gradient(90deg, transparent, transparent 38px, #0B2545 38px, #0B2545 39px);
+    }
+
+    /* ── Main container ── */
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-wrap {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    /* ── Security badge ── */
+    .security-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+    .badge-line {
+      height: 1px;
+      flex: 1;
+      background: #C8D4E8;
+    }
+
+    .security-badge span {
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #5E7A9E;
+      font-weight: 700;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #FFFFFF;
+      border-radius: 4px;
+      border: 1px solid #C8D4E8;
+      border-top: 3px solid #0B2545;
+      padding: 2.25rem 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(11, 37, 69, 0.08);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid #E8EDF5;
+    }
+
+    .card-header h2 {
+      font-family: 'EB Garamond', serif;
+      color: #0B2545;
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      line-height: 1.1;
+    }
+
+    .card-header p {
+      font-size: 12px;
+      color: #7A90B0;
+    }
+
+    .lock-icon {
+      width: 38px;
+      height: 38px;
+      background: #EEF1F7;
+      border: 1px solid #C8D4E8;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Step tracker ── */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #A0B4CC;
+    }
+
+    .step.active {
+      color: #2A6DB5;
+    }
+
+    .step.done {
+      color: #138808;
+    }
+
+    .step-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid #C8D4E8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step.active .step-num {
+      background: #2A6DB5;
+      border-color: #2A6DB5;
+      color: #fff;
+    }
+
+    .step.done .step-num {
+      background: #138808;
+      border-color: #138808;
+      color: #fff;
+    }
+
+    .step-div {
+      width: 24px;
+      height: 1px;
+      background: #D8E4F0;
+    }
+
+    /* ── Form fields ── */
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #3A5272;
+      margin-bottom: 7px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8BA8D4;
+      display: flex;
+    }
+
+    .input {
+      width: 100%;
+      height: 44px;
+      background: #F5F8FC;
+      border: 1px solid #C8D4E8;
+      border-radius: 3px;
+      padding: 0 13px 0 40px;
+      font-size: 14px;
+      color: #0B2545;
+      font-family: 'Lato', sans-serif;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .input:focus {
+      border-color: #2A6DB5;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(42, 109, 181, 0.1);
+    }
+
+    .input::placeholder {
+      color: #A8BEDB;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%;
+      height: 46px;
+      background: #0B2545;
+      border: none;
+      border-radius: 3px;
+      color: #F0F4FF;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 0.25rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+
+    .btn:hover {
+      background: #122E5A;
+    }
+
+    .btn:active {
+      background: #071A34;
+    }
+
+    .btn-accent {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%);
+    }
+
+    .btn.secondary {
+      background: #1A3A6E;
+    }
+
+    .btn.secondary:hover {
+      background: #0B2545;
+    }
+
+    /* ── Message area ── */
+    .msg-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #E8EDF5;
+    }
+
+    .msg-row .small {
+      font-size: 11.5px;
+      color: #7A90B0;
+      line-height: 1.5;
+    }
+
+    .msg-row .small.success {
+      color: #138808;
+      font-weight: 700;
+    }
+
+    .msg-row .small.error {
+      color: #C0392B;
+      font-weight: 700;
+    }
+
+    /* ── Camera block ── */
+    .cam-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #E8EDF5;
+    }
+
+    .video-wrap {
+      width: 90%;
+      max-width: 340px;
+      margin: 10px auto;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid #C8D4E8;
+      transition: box-shadow 0.3s, border-color 0.3s;
+      position: relative;
+    }
+
+    .video-wrap video {
+      width: 100%;
+      display: block;
+      transform: scaleX(-1);
+    }
+
+    .video-wrap.active {
+      box-shadow: 0 0 14px rgba(19, 136, 8, 0.7), 0 0 28px rgba(19, 136, 8, 0.4);
+      border-color: #138808;
+    }
+
+    .video-wrap.idle {
+      box-shadow: 0 0 10px rgba(255, 153, 51, 0.5);
+      border-color: #FF9933;
+    }
+
+    .countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(11, 37, 69, 0.75);
+      color: #F0F4FF;
+      font-size: 26px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+    }
+
+    .preview-box {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #7A90B0;
+    }
+
+    .preview-box img {
+      width: 140px;
+      border-radius: 6px;
+      border: 2px solid #0B2545;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+      margin-top: 6px;
+    }
+
+    /* ── Footer ── */
+    .gov-footer {
+      background: #0B2545;
+      padding: 10px 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #1A3A6E;
+      z-index: 1;
+      position: relative;
+    }
+
+    .gov-footer p {
+      font-size: 10.5px;
+      color: #4A6A94;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      font-size: 10.5px;
+      color: #4A6A94;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: #8BA8D4;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-bg"></div>
+  <div class="strip-top"></div>
+
+  <header class="gov-header">
+    <div class="header-brand">
+      <img class="ashoka"
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png"
+        alt="Emblem of India">
+      <div>
+        <b>Vote Rakshak</b>
+        <span>Blockchain-Secured Electoral System &nbsp;·&nbsp; Administrative Portal</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span class="status-txt">System Online</span>
+    </div>
+  </header>
+
+  <!-- <div class="subheader">
+    <span class="breadcrumb">Home <span>›</span> Admin <span>›</span> Authentication</span>
+  </div> -->
+
+  <div class="subheader">
+  <span class="breadcrumb">
+    <a href="#" onclick="goHome()" style="color:#8BA8D4;text-decoration:none;">Home</a>
+    <span>›</span> Admin <span>›</span> Authentication
+  </span>
+</div>
+
+  <div class="main-wrap">
+    <div class="card-wrap">
+
+      <div class="security-badge">
+        <div class="badge-line"></div>
+        <span>Secure Admin Access</span>
+        <div class="badge-line"></div>
+      </div>
+
+      <div class="card">
+
+        <div class="card-header">
+          <div>
+            <h2>Admin Login</h2>
+            <p>Authorized personnel only — all access is logged</p>
+          </div>
+          <div class="lock-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect x="3" y="8" width="12" height="8" rx="1.5" stroke="#3A5272" stroke-width="1.3" />
+              <path d="M6 8V5.5a3 3 0 016 0V8" stroke="#3A5272" stroke-width="1.3" stroke-linecap="round" />
+              <circle cx="9" cy="12.5" r="1.2" fill="#3A5272" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step tracker -->
+        <div class="steps" id="stepTracker">
+          <div class="step active" id="s1">
+            <div class="step-num">1</div><span>Credentials</span>
+          </div>
+          <div class="step-div"></div>
+          <div class="step" id="s2">
+            <div class="step-num">2</div><span>Face Verify</span>
+          </div>
+          <div class="step-div"></div>
+          <div class="step" id="s3">
+            <div class="step-num">3</div><span>Dashboard</span>
+          </div>
+        </div>
+
+        <!-- Credentials -->
+        <div class="field">
+          <label class="label" for="username">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <circle cx="7.5" cy="5" r="3" stroke="#8BA8D4" stroke-width="1.2" />
+                <path d="M2 13c0-2.5 2.5-4 5.5-4s5.5 1.5 5.5 4" stroke="#8BA8D4" stroke-width="1.2"
+                  stroke-linecap="round" />
+              </svg>
+            </span>
+            <input id="username" class="input" type="text" placeholder="Admin Username" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <rect x="2.5" y="6.5" width="10" height="7" rx="1.2" stroke="#8BA8D4" stroke-width="1.2" />
+                <path d="M5 6.5V4.5a2.5 2.5 0 015 0v2" stroke="#8BA8D4" stroke-width="1.2" stroke-linecap="round" />
+                <circle cx="7.5" cy="10" r="1" fill="#8BA8D4" />
+              </svg>
+            </span>
+            <input id="password" class="input" type="password" placeholder="Password" />
+          </div>
+        </div>
+
+        <button id="step1" class="btn">
+          <div class="btn-accent"></div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h8M7 4l3 3-3 3" stroke="#F0F4FF" stroke-width="1.4" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Verify Credentials
+        </button>
+
+        <div class="msg-row">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0">
+            <circle cx="6.5" cy="6.5" r="5.5" stroke="#8BA8D4" stroke-width="1.1" />
+            <line x1="6.5" y1="5.5" x2="6.5" y2="9.5" stroke="#8BA8D4" stroke-width="1.1" stroke-linecap="round" />
+            <circle cx="6.5" cy="3.8" r="0.6" fill="#8BA8D4" />
+          </svg>
+          <p id="msg" class="small">This portal is monitored. Unauthorized access is reported to the Election
+            Commission.</p>
+        </div>
+
+        <!-- Camera / Face Verification Block -->
+        <div id="camBox" class="cam-section" style="display:none;">
+          <label class="label">Face Verification</label>
+          <div class="video-wrap idle" id="videoWrap">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <div id="countdown" class="countdown"></div>
+          </div>
+          <button id="capture" class="btn" style="margin-top:12px;">
+            <div class="btn-accent"></div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="4" stroke="#F0F4FF" stroke-width="1.4" />
+              <circle cx="7" cy="7" r="1.5" fill="#F0F4FF" />
+              <path d="M5 2h4l1 1.5H3z" fill="#F0F4FF" />
+            </svg>
+            Capture & Login
+          </button>
+          <div id="previewBox" class="preview-box" style="display:none;">
+            <p>Captured frame:</p>
+            <img id="previewImg">
+          </div>
+        </div>
+
+      </div><!-- /.card -->
+    </div>
+  </div>
+
+  <footer class="gov-footer">
+    <p>© 2026 Vote Rakshak &nbsp;·&nbsp; Government of India</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Help</a>
+    </div>
+  </footer>
+  <div class="strip-bot"></div>
+
+  <script>
+    // Check if the admin is already logged in when the page loads
+window.onload = function() {
+  const existingToken = localStorage.getItem("admin_token");
+  if (existingToken) {
+    // If token exists, skip login and go straight to the dashboard
+    window.location.href = "/admin-dashboard?token=" + existingToken;
+  }
+    if (new URLSearchParams(window.location.search).get("expired") === "1") {
+    localStorage.removeItem("admin_token");
+    setMsg("⚠ Your session expired. Please log in again.", "error");
+  }
+};
+    let captured = null, stable = 0, autoReady = true;
+
+    const msg = document.getElementById("msg");
+    const video = document.getElementById("video");
+    const preview = document.getElementById("previewImg");
+    const countdown = document.getElementById("countdown");
+    const videoWrap = document.getElementById("videoWrap");
+
+    function setMsg(text, type) {
+      msg.className = "small" + (type ? " " + type : "");
+      msg.innerText = text;
+    }
+
+    function setStep(n) {
+      ["s1", "s2", "s3"].forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.className = "step" + (i + 1 < n ? " done" : i + 1 === n ? " active" : "");
+      });
+    }
+
+    /* Step 1 — Verify credentials */
+    document.getElementById("step1").onclick = async () => {
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value.trim();
+      if (!u || !p) return setMsg("Please enter both username and password.");
+
+      const res = await fetch("/admin/login_step1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const d = await res.json();
+
+      if (!res.ok) return setMsg(d.error || "Invalid credentials.", "error");
+
+      setMsg("Credentials verified ✔  Proceed with face verification.", "success");
+      setStep(2);
+      document.getElementById("camBox").style.display = "block";
+      startCamera();
+    };
+
+    /* FaceMesh */
+    const faceMesh = new FaceMesh({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}` });
+    faceMesh.setOptions({ maxNumFaces: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+    faceMesh.onResults(onFaceDetect);
+
+    async function startCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      const cam = new Camera(video, { onFrame: async () => await faceMesh.send({ image: video }) });
+      cam.start();
+    }
+
+    function onFaceDetect(res) {
+      if (res.multiFaceLandmarks.length) {
+        videoWrap.classList.add("active");
+        videoWrap.classList.remove("idle");
+        stable++;
+        if (stable > 35 && autoReady) { autoReady = false; runAutoCapture(); }
+      } else {
+        videoWrap.classList.remove("active");
+        videoWrap.classList.add("idle");
+        stable = 0; autoReady = true;
+      }
+    }
+
+    function runAutoCapture() {
+      let s = 3;
+      countdown.style.display = "flex";
+      countdown.innerText = s;
+      const t = setInterval(() => {
+        s--; countdown.innerText = s;
+        if (s <= 0) { clearInterval(t); countdown.style.display = "none"; captureImage(); }
+      }, 700);
+    }
+
+    document.getElementById("capture").onclick = captureImage;
+
+    function captureImage() {
+      const c = document.createElement("canvas");
+      c.width = video.videoWidth; c.height = video.videoHeight;
+      const x = c.getContext("2d");
+      x.translate(c.width, 0); x.scale(-1, 1);
+      x.drawImage(video, 0, 0);
+      captured = c.toDataURL("image/jpeg", 0.9);
+      preview.src = captured;
+      document.getElementById("previewBox").style.display = "block";
+      setMsg("Verifying face…");
+      loginWithFace();
+    }
+
+    async function loginWithFace() {
+      const form = new FormData();
+      form.append("username", document.getElementById("username").value.trim());
+      form.append("image", captured);
+      const res = await fetch("/admin/login_face", { method: "POST", body: form });
+      const d = await res.json();
+      if (res.ok) {
+        setMsg("Login successful ✔  Redirecting to dashboard…", "success");
+        setStep(3);
+        localStorage.setItem("admin_token", d.token);
+        setTimeout(() => {
+          location.href = "/admin-dashboard?token=" + d.token;
+        }, 900);
+        //setTimeout(() => location.href = "/admin-dashboard", 900);
+      } else {
+        setMsg("Face mismatch ❌  Please try again.", "error");
+        autoReady = true; stable = 0;
+      }
+    }
+    function goHome(){
+  window.location.href = "/";
+}
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register Voter — Vote Rakshak</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+
+<style>
+  *,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+
+  :root{
+    --navy:#0d1f4e;
+    --navy-mid:#162766;
+    --navy-dark:#091540;
+    --accent-orange:#e07b22;
+    --accent-green:#2ecc71;
+    --bg:#eef1f8;
+    --card:#ffffff;
+    --text:#1a1a2e;
+    --muted:#6b7280;
+    --border:#d1d9e6;
+    --step-done:#2ecc71;
+  }
+
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .accent-strip{
+    height:4px;
+    background:linear-gradient(
+      90deg,
+      var(--accent-orange) 0%,
+      var(--accent-orange) 30%,
+      var(--accent-green) 30%,
+      var(--accent-green) 100%
+    );
+  }
+
+  .gov-header{
+    background:var(--navy);
+    color:#fff;
+    padding:0 32px;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    box-shadow:0 2px 12px rgba(0,0,0,.35);
+  }
+
+  .header-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:#fff;
+  }
+
+  .header-brand img{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    filter:brightness(0) invert(1);
+  }
+
+  .brand-text .title{
+    font-size:1rem;
+    font-weight:700;
+    letter-spacing:.03em;
+    line-height:1.2;
+  }
+
+  .brand-text .subtitle{
+    font-size:.65rem;
+    color:rgba(255,255,255,.55);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  .status-pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.72rem;
+    font-weight:600;
+    letter-spacing:.06em;
+    color:var(--accent-green);
+    text-transform:uppercase;
+  }
+
+  .status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--accent-green);
+    box-shadow:0 0 6px var(--accent-green);
+    animation:pulse 2s infinite;
+  }
+
+  @keyframes pulse{
+    0%,100%{opacity:1}
+    50%{opacity:.4}
+  }
+
+  .breadcrumb-bar{
+    background:var(--navy-mid);
+    padding:0 32px;
+    height:36px;
+    display:flex;
+    align-items:center;
+  }
+
+  .breadcrumb{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.75rem;
+    color:rgba(255,255,255,.55);
+  }
+
+  .breadcrumb a{
+    color:rgba(255,255,255,.55);
+    text-decoration:none;
+    transition:color .2s;
+  }
+
+  .breadcrumb a:hover{
+    color:#fff;
+  }
+
+  .breadcrumb .sep{
+    color:rgba(255,255,255,.25);
+  }
+
+  .breadcrumb .current{
+    color:rgba(255,255,255,.9);
+    font-weight:500;
+  }
+
+  .main{
+    flex:1;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:36px 16px 60px;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    border:1px solid var(--border);
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+    width:100%;
+    max-width:540px;
+    overflow:hidden;
+  }
+
+  .card-header{
+    padding:28px 32px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+  }
+
+  .card-header h2{
+    font-size:1.45rem;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:4px;
+  }
+
+  .card-header p{
+    font-size:.8rem;
+    color:var(--muted);
+  }
+
+  .card-icon{
+    width:42px;
+    height:42px;
+    border-radius:8px;
+    border:1.5px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.2rem;
+    flex-shrink:0;
+    margin-left:12px;
+  }
+
+  .steps{
+    display:flex;
+    align-items:center;
+    padding:20px 32px 0;
+  }
+
+  .step{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.78rem;
+    color:var(--muted);
+  }
+
+  .step.active{
+    color:var(--navy);
+    font-weight:600;
+  }
+
+  .step.done{
+    color:var(--step-done);
+    font-weight:600;
+  }
+
+  .step-num{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--border);
+    color:var(--muted);
+    font-size:.7rem;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.3s;
+    flex-shrink:0;
+  }
+
+  .step.active .step-num{
+    background:var(--navy);
+    color:#fff;
+  }
+
+  .step.done .step-num{
+    background:var(--step-done);
+    color:#fff;
+  }
+
+  .step-line{
+    flex:1;
+    height:1px;
+    background:var(--border);
+    margin:0 8px;
+  }
+
+  .card-body{
+    padding:20px 32px 28px;
+  }
+
+  .field-group{
+    margin-bottom:14px;
+  }
+
+  .field-label{
+    font-size:.72rem;
+    font-weight:600;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+    display:block;
+  }
+
+  .field-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+
+  .field-icon{
+    position:absolute;
+    left:14px;
+    color:var(--muted);
+    font-size:.95rem;
+    pointer-events:none;
+  }
+
+  .field-input{
+    width:100%;
+    padding:11px 14px 11px 38px;
+    border:1.5px solid var(--border);
+    border-radius:6px;
+    font-size:.88rem;
+    color:var(--text);
+    background:#fff;
+    outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+
+  .field-input::placeholder{
+    color:#b0b8c9;
+  }
+
+  .field-input:focus{
+    border-color:var(--navy);
+    box-shadow:0 0 0 3px rgba(13,31,78,.08);
+  }
+    .camera-section{
+    margin-bottom:14px;
+  }
+
+  .status-hint{
+    font-size:.78rem;
+    font-weight:600;
+    color:#c0392b;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .status-hint.ready{
+    color:#27ae60;
+  }
+
+  .cam-wrap{
+    width:100%;
+    border-radius:8px;
+    overflow:hidden;
+    background:#000;
+    border:2px solid var(--border);
+    position:relative;
+    transition:border-color .3s,box-shadow .3s;
+    aspect-ratio:4/3;
+  }
+
+  .cam-wrap.idle{
+    border-color:var(--accent-orange);
+    box-shadow:0 0 10px rgba(224,123,34,.3);
+  }
+
+  .cam-wrap.active,
+  .cam-wrap.captured{
+    border-color:var(--accent-green);
+    box-shadow:0 0 12px rgba(46,204,113,.35);
+  }
+
+  .cam-wrap video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transform:scaleX(-1);
+  }
+
+  .countdown{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-size:4rem;
+    font-weight:900;
+    color:#fff;
+    text-shadow:0 2px 12px rgba(0,0,0,.6);
+    background:rgba(0,0,0,.35);
+    backdrop-filter:blur(2px);
+  }
+
+  .cam-label{
+    position:absolute;
+    bottom:8px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:.65rem;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.7);
+    background:rgba(0,0,0,.4);
+    padding:3px 10px;
+    border-radius:20px;
+  }
+
+  .preview-box{
+    display:none;
+    align-items:center;
+    gap:12px;
+    background:#f0fdf4;
+    border:1.5px solid #a7f3d0;
+    border-radius:6px;
+    padding:10px 14px;
+    margin-bottom:14px;
+  }
+
+  .preview-box img{
+    width:56px;
+    height:56px;
+    border-radius:6px;
+    object-fit:cover;
+    border:2px solid var(--accent-green);
+  }
+
+  .preview-text{
+    font-size:.8rem;
+    color:#065f46;
+    font-weight:500;
+  }
+
+  .btn-secondary,
+  .btn-primary{
+    width:100%;
+    border-radius:6px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+
+  .btn-secondary{
+    padding:11px;
+    border:1.5px solid var(--border);
+    background:#fff;
+    color:var(--navy);
+    font-size:.85rem;
+    transition:background .2s,border-color .2s;
+    margin-bottom:10px;
+  }
+
+  .btn-secondary:hover{
+    background:#f3f6fb;
+    border-color:#b0b8c9;
+  }
+
+  .btn-primary{
+    padding:13px;
+    border:none;
+    background:var(--navy);
+    color:#fff;
+    font-size:.88rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    transition:background .2s,transform .1s;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .btn-primary::before{
+    content:'';
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:4px;
+    height:100%;
+    background:linear-gradient(
+      180deg,
+      var(--accent-orange),
+      var(--accent-green)
+    );
+  }
+
+  .btn-primary:hover{
+    background:var(--navy-dark);
+  }
+
+  .btn-primary:active{
+    transform:scale(.99);
+  }
+
+  .btn-primary:disabled{
+    cursor:not-allowed;
+    opacity:.7;
+  }
+
+  .result-msg{
+    margin-top:12px;
+    font-size:.82rem;
+    font-weight:600;
+    min-height:20px;
+    text-align:center;
+  }
+
+  .result-msg.success{
+    color:#16a34a;
+  }
+
+  .result-msg.error{
+    color:#dc2626;
+  }
+
+  .notice{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    background:#f8faff;
+    border:1px solid #dce6f5;
+    border-radius:6px;
+    padding:10px 14px;
+    font-size:.75rem;
+    color:var(--muted);
+    margin-top:16px;
+  }
+
+  footer{
+    background:var(--navy);
+    color:rgba(255,255,255,.45);
+    font-size:.72rem;
+    padding:14px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  footer a{
+    color:inherit;
+    text-decoration:none;
+    transition:color .2s;
+  }
+
+  footer a:hover{
+    color:rgba(255,255,255,.85);
+  }
+
+  .footer-links{
+    display:flex;
+    gap:16px;
+  }
+
+  @media(max-width:560px){
+    .gov-header,
+    .breadcrumb-bar{
+      padding-left:16px;
+      padding-right:16px;
+    }
+
+    .card-header,
+    .card-body,
+    .steps{
+      padding-left:18px;
+      padding-right:18px;
+    }
+
+    .brand-text .subtitle{
+      display:none;
+    }
+
+    footer{
+      padding:12px 16px;
+      flex-direction:column;
+      gap:6px;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="accent-strip"></div>
+
+<header class="gov-header">
+  <a class="header-brand" href="/">
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png"
+      alt="Emblem of India"
+    >
+
+    <div class="brand-text">
+      <div class="title">Vote Rakshak</div>
+      <div class="subtitle">
+        Blockchain-Secured Electoral System · Administrative Portal
+      </div>
+    </div>
+  </a>
+
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    System Online
+  </div>
+</header>
+
+<div class="breadcrumb-bar">
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="sep">›</span>
+    <a href="#" id="dashboardLink">Admin</a>
+    <span class="sep">›</span>
+    <span class="current">Register Voter</span>
+  </nav>
+</div>
+
+<main class="main">
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>Register New Voter</h2>
+        <p>Authorized enrollment — all registrations are logged</p>
+      </div>
+
+      <div class="card-icon">🗳️</div>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step1">
+        <div class="step-num">1</div>
+        <span>Details</span>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div class="step" id="step2">
+        <div class="step-num">2</div>
+        <span>Face Capture</span>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div class="step" id="step3">
+        <div class="step-num">3</div>
+        <span>Register</span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="field-group">
+        <label class="field-label" for="enroll">
+          Enrollment Number
+        </label>
+
+        <div class="field-wrap">
+          <span class="field-icon">🪪</span>
+
+          <input
+            id="enroll"
+            class="field-input"
+            type="text"
+            placeholder="Enter enrollment number"
+            autocomplete="off"
+          >
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="nameInput">
+          Full Name
+        </label>
+
+        <div class="field-wrap">
+          <span class="field-icon">👤</span>
+
+          <input
+            id="nameInput"
+            class="field-input"
+            type="text"
+            placeholder="Enter full name"
+            autocomplete="off"
+          >
+        </div>
+      </div>
+
+      <div class="camera-section">
+        <p class="status-hint" id="startMsg">
+          📌 Enter Enrollment & Name to enable face capture
+        </p>
+
+        <div class="cam-wrap idle" id="camBox">
+          <video id="vid" autoplay playsinline></video>
+          <div id="countdown" class="countdown"></div>
+          <div class="cam-label" id="camLabel">Camera Active</div>
+        </div>
+      </div>
+
+      <div class="preview-box" id="previewBox">
+        <img id="previewImg" alt="Captured face">
+        <div class="preview-text">
+          ✔ Face image captured successfully
+        </div>
+      </div>
+
+      <button class="btn-secondary" id="cap" type="button">
+        📷 Capture Photo Manually
+      </button>
+
+      <button class="btn-primary" id="reg" type="button">
+        → SAVE VOTER
+      </button>
+
+      <p class="result-msg" id="msg"></p>
+
+      <div class="notice">
+        <span>ⓘ</span>
+        <span>
+          This portal is monitored. Unauthorized registrations are reported
+          to the Election Commission.
+        </span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© 2026 Vote Rakshak · Government of India</span>
+
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Help</a>
+  </div>
+</footer>
+<script>
+const token = localStorage.getItem("admin_token");
+
+if (!token) {
+  alert("Login required");
+  window.location.href = "/admin";
+}
+
+const enrollEl = document.getElementById("enroll");
+const nameEl = document.getElementById("nameInput");
+const video = document.getElementById("vid");
+const camBox = document.getElementById("camBox");
+const camLabel = document.getElementById("camLabel");
+const countdown = document.getElementById("countdown");
+const previewBox = document.getElementById("previewBox");
+const previewImg = document.getElementById("previewImg");
+const captureBtn = document.getElementById("cap");
+const registerBtn = document.getElementById("reg");
+const msgEl = document.getElementById("msg");
+const startMsg = document.getElementById("startMsg");
+
+const steps = [
+  document.getElementById("step1"),
+  document.getElementById("step2"),
+  document.getElementById("step3")
+];
+
+let captured = null;
+let stable = 0;
+let autoEnabled = false;
+let photoTaken = false;
+let countdownRunning = false;
+
+document.getElementById("dashboardLink").addEventListener("click", event => {
+  event.preventDefault();
+  window.location.href =
+    "/admin-dashboard?token=" + encodeURIComponent(token);
+});
+
+function setStep(currentStep) {
+  steps.forEach((step, index) => {
+    step.classList.remove("active", "done");
+
+    if (index + 1 < currentStep) {
+      step.classList.add("done");
+    }
+
+    if (index + 1 === currentStep) {
+      step.classList.add("active");
+    }
+  });
+}
+
+function completeAllSteps() {
+  steps.forEach(step => {
+    step.classList.remove("active");
+    step.classList.add("done");
+  });
+}
+
+function showMessage(text, type = "") {
+  msgEl.textContent = text;
+  msgEl.className = `result-msg ${type}`.trim();
+}
+
+function enableDetection() {
+  const detailsEntered =
+    enrollEl.value.trim() !== "" &&
+    nameEl.value.trim() !== "";
+
+  if (detailsEntered) {
+    autoEnabled = !photoTaken;
+    startMsg.textContent =
+      "✔ Face capture active – look into camera";
+    startMsg.className = "status-hint ready";
+    setStep(photoTaken ? 3 : 2);
+  } else {
+    autoEnabled = false;
+    startMsg.textContent =
+      "📌 Enter Enrollment & Name to enable face capture";
+    startMsg.className = "status-hint";
+    setStep(1);
+  }
+}
+
+enrollEl.addEventListener("input", enableDetection);
+nameEl.addEventListener("input", enableDetection);
+
+const faceMesh = new FaceMesh({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+});
+
+faceMesh.setOptions({
+  maxNumFaces: 1,
+  minDetectionConfidence: 0.6,
+  minTrackingConfidence: 0.6
+});
+
+faceMesh.onResults(results => {
+  if (!autoEnabled || photoTaken || countdownRunning) {
+    return;
+  }
+
+  if (results.multiFaceLandmarks.length) {
+    stable += 1;
+
+    camBox.classList.add("active");
+    camBox.classList.remove("idle");
+
+    if (stable > 35) {
+      stable = 0;
+      autoCapture();
+    }
+  } else {
+    stable = 0;
+    camBox.classList.remove("active");
+    camBox.classList.add("idle");
+  }
+});
+
+async function startCamera() {
+  try {
+    const stream =
+      await navigator.mediaDevices.getUserMedia({ video: true });
+
+    video.srcObject = stream;
+
+    const camera = new Camera(video, {
+      onFrame: async () => {
+        await faceMesh.send({ image: video });
+      }
+    });
+
+    camera.start();
+  } catch (error) {
+    camLabel.textContent = "Camera unavailable";
+    showMessage(
+      "❌ Camera permission is required.",
+      "error"
+    );
+  }
+}
+
+function autoCapture() {
+  countdownRunning = true;
+
+  let seconds = 3;
+
+  countdown.style.display = "flex";
+  countdown.textContent = seconds;
+
+  const timer = setInterval(() => {
+    seconds -= 1;
+    countdown.textContent = seconds;
+
+    if (seconds <= 0) {
+      clearInterval(timer);
+      countdown.style.display = "none";
+      countdownRunning = false;
+      capturePhoto();
+    }
+  }, 700);
+}
+
+function capturePhoto() {
+  if (!video.videoWidth || !video.videoHeight) {
+    showMessage(
+      "❌ Camera is not ready yet.",
+      "error"
+    );
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const context = canvas.getContext("2d");
+
+  context.translate(canvas.width, 0);
+  context.scale(-1, 1);
+  context.drawImage(video, 0, 0);
+
+  captured = canvas.toDataURL("image/jpeg", 0.9);
+
+  previewImg.src = captured;
+  previewBox.style.display = "flex";
+
+  photoTaken = true;
+  autoEnabled = false;
+
+  camBox.classList.remove("active", "idle");
+  camBox.classList.add("captured");
+
+  showMessage("✔ Image captured", "success");
+  setStep(3);
+}
+
+captureBtn.addEventListener("click", capturePhoto);
+
+registerBtn.addEventListener("click", async () => {
+  const enrollment = enrollEl.value.trim();
+  const name = nameEl.value.trim();
+
+  if (!enrollment || !name) {
+    showMessage(
+      "⚠ Enter enrollment and name first.",
+      "error"
+    );
+    return;
+  }
+
+  if (!captured) {
+    showMessage(
+      "⚠ Capture a photo first.",
+      "error"
+    );
+    return;
+  }
+
+  registerBtn.disabled = true;
+  registerBtn.textContent = "SAVING…";
+  showMessage("Saving voter…");
+
+  const formData = new FormData();
+
+  formData.append("enrollment", enrollment);
+  formData.append("name", name);
+  formData.append("image", captured);
+
+  try {
+    const response = await fetch(
+      "/admin/register_voter_camera",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token
+        },
+        body: formData
+      }
+    );
+
+    const data = await response
+      .json()
+      .catch(() => ({
+        error: "Invalid server response"
+      }));
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Registration failed"
+      );
+    }
+
+    showMessage(
+      "🎉 Voter Registered Successfully!",
+      "success"
+    );
+
+    completeAllSteps();
+
+    registerBtn.textContent =
+      "✓ VOTER REGISTERED";
+  } catch (error) {
+    showMessage(
+      "❌ " + error.message,
+      "error"
+    );
+
+    registerBtn.disabled = false;
+    registerBtn.textContent =
+      "→ SAVE VOTER";
+  }
+});
+
+startCamera();
+</script>
+</body>
+</html>

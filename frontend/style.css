@@ -1,0 +1,218 @@
+/* ===============================================================
+   GOVERNMENT ELECTION PORTAL UI + ADVANCED CAMERA FEATURES
+   (Oval Removed - Auto Capture + Camera Glow Enabled)
+================================================================ */
+
+/* THEME COLORS */
+:root{
+  --primary:#0a2a63;
+  --accent1:#FF9933;
+  --accent2:#138808;
+  --bg:#eef3f8;
+  --card-bg:#ffffff;
+  --text:#111;
+  --muted:#5c5c5c;
+  --border:#d6d6d6;
+  --radius:12px;
+  --maxw:1100px;
+  font-family:"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  color:var(--text);
+
+  /* Background tricolor fade */
+  background: linear-gradient(
+      180deg,
+      rgba(255,153,51,0.18) 0%,
+      rgba(255,255,255,0.45) 50%,
+      rgba(19,136,8,0.20) 100%
+  ), var(--bg);
+
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* Tricolor strip */
+.strip{
+  height:6px;
+  background:linear-gradient(90deg,var(--accent1),#fff,var(--accent2));
+}
+
+/* Header */
+.gov-header{
+  background:var(--primary);
+  color:white;
+  padding:12px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:5px solid var(--accent2);
+}
+
+.top-links a{
+  color:white;
+  font-weight:600;
+  margin-left:15px;
+  text-decoration:none;
+  padding:4px 8px;
+  border-radius:4px;
+}
+.top-links a:hover{background:#ffffff25;}
+
+/* Layout */
+.container{
+  max-width:var(--maxw);
+  margin:30px auto;
+  padding:16px;
+}
+
+/* Card */
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  padding:22px;
+  border-radius:var(--radius);
+  margin-top:22px;
+  border-left:6px solid var(--primary);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  transition:.2s;
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 5px 18px rgba(0,0,0,.18);
+}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:18px;
+}
+@media(max-width:900px){ .grid{grid-template-columns:1fr;} }
+
+/* Inputs Buttons */
+.input{
+  width:100%;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  font-size:14px;
+  background:white;
+}
+.btn{
+  background:var(--accent1);
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  color:#000;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.btn:hover{opacity:.88;}
+.btn.secondary{
+  background:var(--primary);
+  color:white;
+}
+.btn.secondary:hover{opacity:.9;}
+
+.label{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--primary);}
+.small{font-size:13px;color:var(--muted);}
+.footer{text-align:center;margin-top:15px;font-size:13px;color:#444;}
+
+/* Camera Wrapper (responsive + glow) */
+.video-wrap{
+  width:85%;
+  max-width:400px;
+  margin:auto;
+  border:1px solid #bbb;
+  border-radius:10px;
+  overflow:hidden;
+  background:#000;
+  position:relative;
+  transition:.3s ease;
+}
+@media (max-width:768px){
+  .video-wrap{max-width:300px;width:90%;}
+}
+
+video{
+  width:100%;
+  display:block;
+  transform:scaleX(-1);
+}
+
+/* Glow Indicator */
+.video-wrap.active{
+  box-shadow:0 0 15px rgba(19,136,8,0.8),0 0 25px rgba(19,136,8,0.6);
+  border:2px solid #138808 !important;
+}
+.video-wrap.idle{
+  box-shadow:0 0 12px rgba(255,153,51,0.6);
+  border:2px solid #FF9933 !important;
+}
+
+/* Remove Oval Feature */
+.face-guide,.face-guide.good,.face-guide.ready,.face-guide.bad{
+  display:none!important;visibility:hidden!important;
+  opacity:0!important;width:0!important;height:0!important;border:none!important;
+}
+.face-box{display:none!important;}
+
+/* Quality Dots */
+.quality-bar{display:flex;gap:6px;margin-top:10px;justify-content:center;}
+.q-dot{width:10px;height:10px;border-radius:50%;background:#bbb;}
+.q-bad{background:#d62828!important;}
+.q-mid{background:#f4a100!important;}
+.q-good{background:#138808!important;}
+
+/* Captured preview */
+#previewBox{margin-top:10px;text-align:center;display:none;}
+#previewImg{
+  width:160px;border-radius:10px;border:2px solid #138808;
+  box-shadow:0 0 10px rgba(0,0,0,.3);
+}
+
+/* Warnings */
+.light-warning,.blur-warning,.pose-warning{
+  margin-top:10px;padding:8px;font-size:14px;font-weight:600;
+  border-radius:6px;text-align:center;display:none;
+}
+.light-warning{background:#ffeb3b;color:#333;}
+.blur-warning{background:#ff4d4d;color:white;}
+.pose-warning{background:#00aaff;color:white;}
+
+/* Countdown */
+.countdown{
+  width:70px;height:70px;background:#000;color:#fff;font-size:26px;
+  border-radius:50%;margin:10px auto 0;display:none;
+  align-items:center;justify-content:center;font-weight:700;
+}
+
+/* Candidate List */
+#listCandidates{margin-top:12px;} /* space requested */
+.candidate{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px;margin-bottom:8px;background:white;border:1px solid var(--border);
+  border-radius:10px;border-left:5px solid var(--primary);
+}
+.candidate strong{color:var(--primary);}
+.badge{
+  background:var(--primary);color:#fff;padding:6px 10px;
+  border-radius:999px;font-weight:bold;
+}
+
+/* Table */
+.table{width:100%;border-collapse:collapse;}
+.table th{text-align:left;padding:8px;font-size:13px;color:var(--muted);}
+.table td{padding:8px;border-top:1px solid #eee;font-size:14px;}
+
+/* Ashoka emblem fix */
+.ashoka{
+  width:65px;
+  filter:drop-shadow(0 0 3px gold) brightness(1.1);
+}

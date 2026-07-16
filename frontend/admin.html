@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Vote Rakshak</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0d1f4e;--navy-mid:#162766;--navy-dark:#091540;
+    --accent-orange:#e07b22;--accent-green:#2ecc71;
+    --bg:#eef1f8;--card:#ffffff;--text:#1a1a2e;--muted:#6b7280;--border:#d1d9e6;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+  .accent-strip{height:4px;background:linear-gradient(90deg,var(--accent-orange) 0%,var(--accent-orange) 30%,var(--accent-green) 30%,var(--accent-green) 100%)}
+  .gov-header{background:var(--navy);color:#fff;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.35)}
+  .header-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;cursor:pointer}
+  .header-brand img{width:38px;height:38px;object-fit:contain;filter:brightness(0) invert(1)}
+  .brand-text .title{font-size:1rem;font-weight:700;letter-spacing:.03em;line-height:1.2}
+  .brand-text .subtitle{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase}
+  .header-right{display:flex;align-items:center}
+  .header-nav{display:flex;align-items:center;gap:4px}
+  .header-nav a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.8rem;font-weight:500;padding:6px 14px;border-radius:5px;transition:background .2s,color .2s;cursor:pointer}
+  .header-nav a:hover{background:rgba(255,255,255,.1);color:#fff}
+  .header-nav a.active{background:rgba(255,255,255,.15);color:#fff}
+  .header-nav a.danger{color:#fca5a5}
+  .header-nav a.danger:hover{background:rgba(239,68,68,.15)}
+  .status-pill{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;letter-spacing:.06em;color:var(--accent-green);text-transform:uppercase;margin-left:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,.15)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 6px var(--accent-green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .breadcrumb-bar{background:var(--navy-mid);padding:0 32px;height:36px;display:flex;align-items:center}
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:.75rem;color:rgba(255,255,255,.55)}
+  .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none;cursor:pointer;transition:color .2s}
+  .breadcrumb a:hover{color:#fff}
+  .breadcrumb .sep{color:rgba(255,255,255,.25)}
+  .breadcrumb .current{color:rgba(255,255,255,.9);font-weight:500}
+  .main{flex:1;padding:28px 16px 60px;max-width:980px;margin:0 auto;width:100%}
+  .page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+  .page-title{font-size:1.3rem;font-weight:800;color:var(--navy)}
+  .admin-badge{background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--muted);letter-spacing:.04em}
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.05);position:relative;overflow:hidden}
+  .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent-green)}
+  .stat-card:nth-child(2)::before{background:var(--accent-orange)}
+  .stat-card:nth-child(3)::before{background:#3b82f6}
+  .stat-label{font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .stat-value{font-size:1.6rem;font-weight:800;color:var(--navy);line-height:1}
+  .stat-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.6rem;opacity:.15}
+  .card{background:var(--card);border-radius:10px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px}
+  .card-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .card-header-left{display:flex;align-items:center;gap:10px}
+  .card-icon{font-size:1.1rem}
+  .card-title{font-size:.95rem;font-weight:700;color:var(--navy)}
+  .card-body{padding:20px 24px}
+
+  /* VOTING SESSION CARD */
+  .session-status-banner{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 18px;border-radius:8px;margin-bottom:18px;
+    border:1.5px solid var(--border);background:#f8faff;
+  }
+  .session-status-banner.open{background:#f0fdf4;border-color:#a7f3d0}
+  .session-status-banner.upcoming{background:#fffbeb;border-color:#fde68a}
+  .session-status-banner.closed{background:#fef2f2;border-color:#fecaca}
+  .session-status-banner.not_set{background:#f8faff;border-color:var(--border)}
+  .ssb-icon{font-size:1.6rem;flex-shrink:0}
+  .ssb-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .ssb-value{font-size:.95rem;font-weight:700;color:var(--navy)}
+  .ssb-countdown{font-size:1.2rem;font-weight:800;color:var(--navy);margin-left:auto;font-family:monospace}
+
+  .session-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  .field-group{display:flex;flex-direction:column;gap:5px}
+  .field-label{font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .field-input{padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+  .field-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,31,78,.08)}
+  .session-btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+  .add-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .field-wrap{position:relative;display:flex;align-items:center;flex:1;min-width:180px}
+  .field-icon{position:absolute;left:13px;color:var(--muted);font-size:.9rem;pointer-events:none}
+  .finput{width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:6px;font-size:.88rem;color:var(--text);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+  .finput::placeholder{color:#b0b8c9}
+  .finput:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,31,78,.08)}
+
+  .btn-primary{padding:10px 22px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:.85rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .1s;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden;white-space:nowrap}
+  .btn-primary::before{content:'';position:absolute;left:0;bottom:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent-orange),var(--accent-green))}
+  .btn-primary:hover{background:var(--navy-dark)}
+  .btn-green{background:#16a34a}
+  .btn-green:hover{background:#15803d}
+  .btn-green::before{background:linear-gradient(180deg,#4ade80,#16a34a)}
+  .btn-red{background:#dc2626}
+  .btn-red:hover{background:#b91c1c}
+  .btn-red::before{background:linear-gradient(180deg,#f87171,#dc2626)}
+  .btn-secondary{padding:9px 16px;border:1.5px solid var(--border);border-radius:6px;background:#fff;color:var(--navy);font-size:.82rem;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn-secondary:hover{background:#f3f6fb;border-color:#94a3c4}
+  .btn-danger{padding:6px 12px;border:1.5px solid #fecaca;border-radius:5px;background:#fff5f5;color:#dc2626;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:4px}
+  .btn-danger:hover{background:#fee2e2}
+
+  .data-table{width:100%;border-collapse:collapse}
+  .data-table thead tr{border-bottom:2px solid var(--border)}
+  .data-table th{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left}
+  .data-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  .data-table tbody tr:last-child{border-bottom:none}
+  .data-table tbody tr:hover{background:#f8faff}
+  .data-table td{padding:12px 14px;font-size:.87rem;vertical-align:middle}
+  .id-badge{background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:4px}
+  .vote-count{background:var(--navy);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
+  .enroll-tag{background:#f0f4ff;border:1px solid #c7d2fe;color:var(--navy);font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:4px;font-family:monospace}
+  .empty-state{text-align:center;padding:28px;color:var(--muted);font-size:.85rem;border:1.5px dashed var(--border);border-radius:8px;margin:4px 0}
+  .result-msg{font-size:.8rem;font-weight:600;margin-top:8px;min-height:18px}
+  .result-msg.success{color:#16a34a}
+  .result-msg.error{color:#dc2626}
+  .notice{display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 14px;font-size:.75rem;color:#92400e;margin-top:14px}
+  footer{background:var(--navy);color:rgba(255,255,255,.45);font-size:.72rem;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
+  footer a:hover{color:rgba(255,255,255,.85)}
+  .footer-links{display:flex;gap:16px}
+  @media(max-width:640px){.stats-row{grid-template-columns:1fr 1fr}.session-grid{grid-template-columns:1fr}.gov-header,.breadcrumb-bar{padding:0 16px}.main{padding:16px 12px 40px}footer{padding:12px 16px;flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div class="accent-strip"></div>
+
+<header class="gov-header">
+  <div class="header-brand" onclick="goHome()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="Emblem">
+    <div class="brand-text">
+      <div class="title">Vote Rakshak</div>
+      <div class="subtitle">Blockchain-Secured Electoral System &nbsp;·&nbsp; Administrative Portal</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <nav class="header-nav">
+      <a onclick="goHome()">Home</a>
+      <a onclick="goResults()">Results</a>
+      <a class="active">Dashboard</a>
+      <a class="danger" onclick="logout()">⎋ Logout</a>
+    </nav>
+    <div class="status-pill"><div class="status-dot"></div>Admin</div>
+  </div>
+</header>
+
+<div class="breadcrumb-bar">
+  <nav class="breadcrumb">
+    <a onclick="goHome()">Home</a><span class="sep">›</span>
+    <a>Admin</a><span class="sep">›</span>
+    <span class="current">Dashboard</span>
+  </nav>
+</div>
+
+<main class="main">
+
+  <div class="page-title-row">
+    <div class="page-title">Admin Dashboard</div>
+    <div class="admin-badge">🔒 Authorized Access Only</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Candidates</div>
+      <div class="stat-value" id="statCandidates">—</div>
+      <div class="stat-icon">🏛️</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Registered Voters</div>
+      <div class="stat-value" id="statVoters">—</div>
+      <div class="stat-icon">👥</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Votes Cast</div>
+      <div class="stat-value" id="statVotes">—</div>
+      <div class="stat-icon">🗳️</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ VOTING SESSION CARD ══════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-icon">⏱️</span>
+        <span class="card-title">Voting Session Control</span>
+      </div>
+      <span id="sessionStatusBadge" style="font-size:.75rem;font-weight:600;color:var(--muted)">Loading…</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Status banner -->
+      <div class="session-status-banner not_set" id="sessionBanner">
+        <span class="ssb-icon" id="ssbIcon">🕐</span>
+        <div>
+          <div class="ssb-label">Session Status</div>
+          <div class="ssb-value" id="ssbValue">Not configured</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px" id="ssbRange"></div>
+        </div>
+        <div class="ssb-countdown" id="ssbCountdown"></div>
+      </div>
+
+      <!-- Date/time pickers -->
+      <div class="session-grid">
+        <div class="field-group">
+          <label class="field-label">Start Date &amp; Time</label>
+          <input type="datetime-local" id="startTime" class="field-input">
+        </div>
+        <div class="field-group">
+          <label class="field-label">End Date &amp; Time</label>
+          <input type="datetime-local" id="endTime" class="field-input">
+        </div>
+      </div>
+
+      <div class="session-btn-row">
+        <button class="btn-primary btn-green" onclick="setSession()">✔ Set Voting Session</button>
+        <button class="btn-primary btn-red" onclick="clearSession()">✕ Clear Session</button>
+      </div>
+      <p class="result-msg" id="sessionMsg"></p>
+    </div>
+  </div>
+
+  <!-- ADD CANDIDATE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left"><span class="card-icon">➕</span><span class="card-title">Add Candidate</span></div>
+    </div>
+    <div class="card-body">
+      <div class="add-form">
+        <div class="field-wrap">
+          <span class="field-icon">👤</span>
+          <input id="candName" class="finput" type="text" placeholder="Enter candidate name">
+        </div>
+        <button class="btn-primary" onclick="addCandidate()">→ Add Candidate</button>
+      </div>
+      <p class="result-msg" id="candMsg"></p>
+    </div>
+  </div>
+
+  <!-- CANDIDATES TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left"><span class="card-icon">🏛️</span><span class="card-title">All Candidates</span></div>
+      <span id="candCount" style="font-size:.75rem;color:var(--muted)"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th style="width:60px">ID</th><th>Name</th><th style="width:110px">Votes</th><th style="width:90px">Action</th></tr></thead>
+        <tbody id="candTable"><tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REGISTERED VOTERS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left"><span class="card-icon">👥</span><span class="card-title">Registered Voters</span></div>
+      <button class="btn-secondary" onclick="goRegisterVoter()">＋ Register New Voter</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th style="width:60px">ID</th><th>Enrollment</th><th>Name</th><th style="width:90px">Action</th></tr></thead>
+        <tbody id="voterTable"><tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="notice">⚠️ &nbsp;All actions are logged and reported to the Election Commission.</div>
+
+</main>
+
+<footer>
+  <span>© 2026 Vote Rakshak &nbsp;·&nbsp; Government of India</span>
+  <div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Help</a></div>
+</footer>
+
+<script>
+const token = localStorage.getItem("admin_token");
+if (!token) { alert("Admin login required"); window.location.href = "/admin"; }
+
+function goHome()   { window.location.href = "/"; }
+function goResults(){ window.location.href = "/results"; }
+function goRegisterVoter(){ window.location.href = "/register-voter?token=" + token; }
+function logout(){ localStorage.removeItem("admin_token"); window.location.href = "/admin"; }
+
+function handleExpired(){
+  clearInterval(window._candInterval);
+  clearInterval(window._voterInterval);
+  clearInterval(window._sessionInterval);
+  localStorage.removeItem("admin_token");
+  window.location.href = "/admin?expired=1";
+}
+
+function setMsg(id, text, type){
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = "result-msg " + type;
+  if(type === "success") setTimeout(() => { el.textContent = ""; el.className = "result-msg"; }, 3500);
+}
+
+// ── FORMAT COUNTDOWN ──
+function fmtCountdown(sec){
+  if(sec <= 0) return "00:00:00";
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return [h,m,s].map(v => String(v).padStart(2,"0")).join(":");
+}
+
+// ── FORMAT DATETIME FOR DISPLAY ──
+function fmtDT(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  // const d = new Date(iso + "Z");
+  return d.toLocaleString(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+  hour12: false   // 👈 force 24-hour format
+});
+  // return d.toLocaleString(undefined, {dateStyle:"medium", timeStyle:"short"});
+}
+
+// ── VOTING SESSION UI ──
+let countdownInterval = null;
+let sessionData = null;
+
+function renderSession(vs){
+  sessionData = vs;
+  const banner = document.getElementById("sessionBanner");
+  const icon   = document.getElementById("ssbIcon");
+  const val    = document.getElementById("ssbValue");
+  const range  = document.getElementById("ssbRange");
+  const cd     = document.getElementById("ssbCountdown");
+  const badge  = document.getElementById("sessionStatusBadge");
+
+  banner.className = "session-status-banner " + vs.status;
+
+  // if(vs.status === "not_set"){
+  //   icon.textContent = "🕐"; val.textContent = "No session configured";
+  //   range.textContent = ""; cd.textContent = ""; badge.textContent = "Not Set";
+  //   badge.style.color = "var(--muted)";
+  // } 
+  if(vs.status === "not_set"){
+  icon.textContent = "🕐";
+  val.textContent = "No session configured";
+  range.textContent = "";
+
+  // ✅ STOP running countdown
+  if(countdownInterval){
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+
+  // ✅ CLEAR UI
+  cd.textContent = "";
+
+  badge.textContent = "Not Set";
+  badge.style.color = "var(--muted)";
+}
+   else if(vs.status === "upcoming"){
+    icon.textContent = "⏳"; val.textContent = "Voting not started yet";
+    range.textContent = "Opens: " + fmtDT(vs.start) + " → Closes: " + fmtDT(vs.end);
+    badge.textContent = "⏳ Upcoming"; badge.style.color = "#d97706";
+    startLiveCountdown(vs.start, cd, "Opens in ");
+    // startCountdown(vs.opens_in_seconds, cd, "Opens in ");
+  } else if(vs.status === "open"){
+    icon.textContent = "✅"; val.textContent = "Voting is OPEN";
+    range.textContent = "Closes: " + fmtDT(vs.end);
+    badge.textContent = "✅ Open"; badge.style.color = "#16a34a";
+    startLiveCountdown(vs.end, cd, "Closes in ");
+    // startCountdown(vs.remaining_seconds, cd, "Closes in ");
+  } else {
+    icon.textContent = "🔒"; val.textContent = "Voting session ended";
+    range.textContent = "Was: " + fmtDT(vs.start) + " → " + fmtDT(vs.end);
+    cd.textContent = ""; badge.textContent = "🔒 Closed"; badge.style.color = "#dc2626";
+    if(countdownInterval) clearInterval(countdownInterval);
+  }
+}
+
+function startLiveCountdown(endISO, el, prefix){
+  if(countdownInterval) clearInterval(countdownInterval);
+
+  function update(){
+    const now = new Date().getTime();
+    const end = new Date(endISO).getTime();
+
+    let diff = Math.floor((end - now) / 1000);
+
+    if(diff <= 0){
+      el.textContent = prefix + "00:00:00";
+      clearInterval(countdownInterval);
+      loadSessionStatus(); // refresh status
+      return;
+    }
+
+    el.textContent = prefix + fmtCountdown(diff);
+  }
+
+  update(); // run immediately
+  countdownInterval = setInterval(update, 1000);
+}
+// function startCountdown(seconds, el, prefix){
+//   if(countdownInterval) clearInterval(countdownInterval);
+//   let s = seconds;
+//   el.textContent = prefix + fmtCountdown(s);
+//   countdownInterval = setInterval(() => {
+//     s--;
+//     if(s <= 0){ clearInterval(countdownInterval); loadSessionStatus(); return; }
+//     el.textContent = prefix + fmtCountdown(s);
+//   }, 1000);
+// }
+
+async function loadSessionStatus(){
+  try {
+    const r = await fetch("/voting_status");
+    const vs = await r.json();
+    renderSession(vs);
+
+    // Pre-fill datetime inputs if session exists
+    if(vs.start){
+      document.getElementById("startTime").value = vs.start.slice(0,16);
+      document.getElementById("endTime").value   = vs.end.slice(0,16);
+    }
+
+    // ── LOCK UI during active voting session ──
+    const isOpen = vs.status === "open";
+
+    // Lock candidate input + button
+    const candInput = document.getElementById("candName");
+    const addBtn    = document.querySelector(".add-form .btn-primary");
+    candInput.disabled     = isOpen;
+    candInput.placeholder  = isOpen ? "🔒 Voting in progress — locked" : "Enter candidate name";
+    candInput.style.opacity = isOpen ? "0.5" : "1";
+    if(addBtn){
+      addBtn.disabled       = isOpen;
+      addBtn.style.opacity  = isOpen ? "0.5" : "1";
+      addBtn.style.cursor   = isOpen ? "not-allowed" : "pointer";
+    }
+
+    // Lock register voter button
+    const regBtn = document.querySelector(".btn-secondary[onclick='goRegisterVoter()']");
+    if(regBtn){
+      regBtn.disabled      = isOpen;
+      regBtn.style.opacity = isOpen ? "0.5" : "1";
+      regBtn.style.cursor  = isOpen ? "not-allowed" : "pointer";
+      regBtn.title         = isOpen ? "Disabled during active voting session" : "";
+    }
+
+  } catch(e){}
+}
+
+// async function loadSessionStatus(){
+//   try {
+//     const r = await fetch("/voting_status");
+//     const vs = await r.json();
+//     renderSession(vs);
+
+//     // Pre-fill datetime inputs if session exists
+//     if(vs.start){
+//       document.getElementById("startTime").value = vs.start.slice(0,16);
+//       document.getElementById("endTime").value   = vs.end.slice(0,16);
+//     }
+//   } catch(e){}
+// }
+
+// ── SET SESSION ──
+async function setSession(){
+  const start = document.getElementById("startTime").value;
+  const end   = document.getElementById("endTime").value;
+
+  if(!start || !end){ setMsg("sessionMsg","⚠ Select both start and end time","error"); return; }
+  if(new Date(end) <= new Date(start)){ setMsg("sessionMsg","⚠ End must be after start","error"); return; }
+
+  setMsg("sessionMsg","Saving…","");
+  try {
+    const r = await fetch("/admin/set_voting_session", {
+      method:"POST",
+      headers:{"Content-Type":"application/json", "Authorization":"Bearer "+token},
+      body: JSON.stringify({ start: start+":00", end: end+":00" })
+    });
+    const d = await r.json();
+    if(r.ok){ setMsg("sessionMsg","✔ Voting session saved","success"); loadSessionStatus(); }
+    else     { setMsg("sessionMsg","❌ " + d.error, "error"); }
+  } catch(e){ setMsg("sessionMsg","❌ Network error","error"); }
+}
+
+// ── CLEAR SESSION ──
+async function clearSession(){
+  if(!confirm("Clear the voting session? Voting will be disabled.")) return;
+
+  try {
+    const r = await fetch("/admin/clear_voting_session", {
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token}
+    });
+
+    if(r.ok){
+      setMsg("sessionMsg","✔ Session cleared","success");
+
+      // ✅ CLEAR INPUTS
+      document.getElementById("startTime").value = "";
+      document.getElementById("endTime").value = "";
+
+      // ✅ RESET UI IMMEDIATELY
+      renderSession({
+        status: "not_set"
+      });
+
+      // OPTIONAL: reload from backend
+      loadSessionStatus();
+    }
+
+  } catch(e){
+    setMsg("sessionMsg","❌ Network error","error");
+  }
+}
+// async function clearSession(){
+//   if(!confirm("Clear the voting session? Voting will be disabled.")) return;
+//   try {
+//     const r = await fetch("/admin/clear_voting_session", {
+//       method:"POST", headers:{"Authorization":"Bearer "+token}
+//     });
+//     if(r.ok){ setMsg("sessionMsg","✔ Session cleared","success"); loadSessionStatus(); }
+//   } catch(e){ setMsg("sessionMsg","❌ Network error","error"); }
+// }
+
+// ── CANDIDATES ──
+async function loadCandidates(){
+   if(!token) return; 
+  try {
+    const r = await fetch("/candidates", { headers:{"Authorization":"Bearer "+token} });
+    if(r.status === 401){ handleExpired(); return; }
+    const data = await r.json();
+    document.getElementById("statCandidates").textContent = data.length;
+    document.getElementById("statVotes").textContent = data.reduce((a,c) => a+c.votes, 0);
+    document.getElementById("candCount").textContent = data.length + " total";
+
+    if(!data.length){
+      document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No candidates yet</div></td></tr>'; return;
+    }
+    document.getElementById("candTable").innerHTML = data.map(c => `
+      <tr>
+        <td><span class="id-badge">${c.id}</span></td>
+        <td style="font-weight:600;color:var(--navy)">${c.name}</td>
+        <td><span class="vote-count">${c.votes}</span></td>
+        <td><button class="btn-danger" onclick="deleteCandidate(${c.id})">🗑 Delete</button></td>
+      </tr>`).join("");
+  } catch(e){
+    document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">Failed to load</div></td></tr>';
+  }
+}
+
+// async function loadCandidates(){
+//   try {
+//     const r    = await fetch("/candidates", { headers:{"Authorization":"Bearer "+token} });
+//     const data = await r.json();
+//     document.getElementById("statCandidates").textContent = data.length;
+//     document.getElementById("statVotes").textContent = data.reduce((a,c) => a+c.votes, 0);
+//     document.getElementById("candCount").textContent = data.length + " total";
+
+//     if(!data.length){
+//       document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No candidates yet</div></td></tr>'; return;
+//     }
+//     document.getElementById("candTable").innerHTML = data.map(c => `
+//       <tr>
+//         <td><span class="id-badge">${c.id}</span></td>
+//         <td style="font-weight:600;color:var(--navy)">${c.name}</td>
+//         <td><span class="vote-count">${c.votes}</span></td>
+//         <td><button class="btn-danger" onclick="deleteCandidate(${c.id})">🗑 Delete</button></td>
+//       </tr>`).join("");
+//   } catch(e){
+//     document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">Failed to load</div></td></tr>';
+//   }
+// }
+
+async function addCandidate(){
+  const name = document.getElementById("candName").value.trim();
+  if(!name){ setMsg("candMsg","⚠ Enter a candidate name","error"); return; }
+  setMsg("candMsg","Adding…","");
+  try {
+    const fd = new FormData(); fd.append("name", name);
+    const r  = await fetch("/admin/add_candidate", {
+      method:"POST", headers:{"Authorization":"Bearer "+token}, body:fd });
+    const d  = await r.json();
+    if(r.ok){ setMsg("candMsg","✔ Candidate added","success"); document.getElementById("candName").value=""; loadCandidates(); }
+    else     { setMsg("candMsg","❌ "+d.error,"error"); }
+  } catch(e){ setMsg("candMsg","❌ Network error","error"); }
+}
+document.getElementById("candName").addEventListener("keydown", e => { if(e.key==="Enter") addCandidate(); });
+
+async function deleteCandidate(id){
+  if(!confirm("Delete this candidate? Cannot be undone.")) return;
+  try {
+    const r = await fetch("/admin/delete_candidate/"+id, { method:"DELETE", headers:{"Authorization":"Bearer "+token} });
+    if(r.ok) loadCandidates(); else alert("Failed to delete");
+  } catch(e){ alert("Network error"); }
+}
+
+// ── VOTERS ──
+async function loadVoters(){
+  if(!token) return; 
+  try {
+    const r = await fetch("/admin/voters", { headers:{"Authorization":"Bearer "+token} });
+    if(r.status === 401){ handleExpired(); return; }
+    const data = await r.json();
+    document.getElementById("statVoters").textContent = data.length;
+
+    if(!data.length){
+      document.getElementById("voterTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No voters registered yet</div></td></tr>'; return;
+    }
+    document.getElementById("voterTable").innerHTML = data.map(v => `
+      <tr>
+        <td><span class="id-badge">${v.id}</span></td>
+        <td><span class="enroll-tag">${v.enrollment}</span></td>
+        <td style="font-weight:600">${v.name}</td>
+        <td><button class="btn-danger" onclick="deleteVoter(${v.id})">🗑 Delete</button></td>
+      </tr>`).join("");
+  } catch(e){
+    document.getElementById("voterTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">Failed to load</div></td></tr>';
+  }
+}
+
+// async function loadVoters(){
+//   try {
+//     const r    = await fetch("/admin/voters", { headers:{"Authorization":"Bearer "+token} });
+//     const data = await r.json();
+//     document.getElementById("statVoters").textContent = data.length;
+
+//     if(!data.length){
+//       document.getElementById("voterTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No voters registered yet</div></td></tr>'; return;
+//     }
+//     document.getElementById("voterTable").innerHTML = data.map(v => `
+//       <tr>
+//         <td><span class="id-badge">${v.id}</span></td>
+//         <td><span class="enroll-tag">${v.enrollment}</span></td>
+//         <td style="font-weight:600">${v.name}</td>
+//         <td><button class="btn-danger" onclick="deleteVoter(${v.id})">🗑 Delete</button></td>
+//       </tr>`).join("");
+//   } catch(e){
+//     document.getElementById("voterTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">Failed to load</div></td></tr>';
+//   }
+// }
+
+async function deleteVoter(id){
+  if(!confirm("Remove this voter?")) return;
+  try {
+    const r = await fetch("/admin/delete_voter/"+id, { method:"DELETE", headers:{"Authorization":"Bearer "+token} });
+    if(r.ok) loadVoters(); else alert("Failed to delete");
+  } catch(e){ alert("Network error"); }
+}
+
+// ── INIT ──
+loadSessionStatus();
+loadCandidates();
+loadVoters();
+window._candInterval    = setInterval(loadCandidates, 6000);
+window._voterInterval   = setInterval(loadVoters, 6000);
+window._sessionInterval = setInterval(loadSessionStatus, 30000);
+
+// setInterval(loadCandidates, 6000);
+// setInterval(loadVoters, 6000);
+// setInterval(loadSessionStatus, 30000);
+</script>
+</body>
+</html>

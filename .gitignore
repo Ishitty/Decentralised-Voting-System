@@ -1,0 +1,59 @@
+# ----------------------------
+# Python
+# ----------------------------
+venv/
+venv310/
+.venv/
+ENV/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ----------------------------
+# Flask
+# ----------------------------
+backend/uploads/
+
+# ----------------------------
+# Secrets
+# ----------------------------
+backend/config/secret.py
+.env
+
+# ----------------------------
+# Node
+# ----------------------------
+node_modules/
+npm-debug.log*
+
+# ----------------------------
+# IDE
+# ----------------------------
+.vscode/
+.idea/
+
+# ----------------------------
+# Operating System
+# ----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----------------------------
+# Logs
+# ----------------------------
+*.log
+
+# ----------------------------
+# Temporary files
+# ----------------------------
+*.tmp
+*.temp
+# Tool state
+.states/
+# Solidity build cache
+artifacts/build-info/
+
+# Runtime files
+backend/voting_session.json

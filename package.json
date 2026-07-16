@@ -1,0 +1,16 @@
+{
+  "name": "fyp",
+  "version": "1.0.0",
+  "description": "🗳️ Decentralized Voting System with Facial Authentication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "solc": "^0.8.36",
+    "web3": "^4.16.0"
+  }
+}
