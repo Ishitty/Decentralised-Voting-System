@@ -1,0 +1,38 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/frontend/home.html"
+    },
+    {
+      "source": "/home",
+      "destination": "/frontend/home.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/frontend/admin.html"
+    },
+    {
+      "source": "/admin-login",
+      "destination": "/frontend/admin_login.html"
+    },
+    {
+      "source": "/candidate",
+      "destination": "/frontend/candidate.html"
+    },
+    {
+      "source": "/register-voter",
+      "destination": "/frontend/register_voter.html"
+    },
+    {
+      "source": "/results",
+      "destination": "/frontend/results.html"
+    },
+    {
+      "source": "/voters",
+      "destination": "/frontend/voters.html"
+    }
+  ]
+}
