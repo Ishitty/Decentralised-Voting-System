@@ -1,35 +1,44 @@
-# backend/models.py
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.mysql import LONGBLOB
-import urllib.parse
+import os
+
+from sqlalchemy import Column, Integer, LargeBinary, String, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
 
 # ---------------------------------------------------------
-#   DATABASE CONFIG
+# DATABASE CONFIG
 # ---------------------------------------------------------
-MYSQL_USER = "root"
-# MYSQL_PASSWORD = "myishusql1924"
-MYSQL_PASSWORD = "myishusql1924"
-MYSQL_HOST = "127.0.0.1"
-MYSQL_PORT = "3306"
-MYSQL_DB = "decentralised_voting"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-encoded_pass = urllib.parse.quote_plus(MYSQL_PASSWORD)
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is missing. "
+        "Example: mysql+pymysql://user:password@host:3306/database"
+    )
 
-DATABASE_URL = (
-    f"mysql+pymysql://{MYSQL_USER}:{encoded_pass}@"
-    f"{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+
+# Some hosting services provide mysql:// instead of mysql+pymysql://
+if DATABASE_URL.startswith("mysql://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "mysql://",
+        "mysql+pymysql://",
+        1,
+    )
+
+
+# ---------------------------------------------------------
+# ENGINE + BASE
+# ---------------------------------------------------------
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=280,
 )
 
-# ---------------------------------------------------------
-#   ENGINE + BASE
-# ---------------------------------------------------------
-engine = create_engine(DATABASE_URL, echo=False)
 Base = declarative_base()
 
+
 # ---------------------------------------------------------
-#   MODELS
+# MODELS
 # ---------------------------------------------------------
 class Admin(Base):
     __tablename__ = "admin"
@@ -37,9 +46,7 @@ class Admin(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(300), nullable=False)
-
-    # Face embedding (128 floats ≈ 512 bytes, but we keep LONGBLOB for future)
-    face_encoding = Column(LONGBLOB, nullable=False)
+    face_encoding = Column(LargeBinary, nullable=False)
 
 
 class Voter(Base):
@@ -48,19 +55,22 @@ class Voter(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     enrollment = Column(String(50), unique=True, nullable=False)
     name = Column(String(100), nullable=False)
-
-    # Face embedding
-    face_encoding = Column(LONGBLOB, nullable=False)
+    face_encoding = Column(LargeBinary, nullable=False)
 
 
 # ---------------------------------------------------------
-#   CREATE TABLES IF NOT EXISTS
+# CREATE TABLES
 # ---------------------------------------------------------
-Base.metadata.create_all(engine)
+Base.metadata.create_all(bind=engine)
+
 
 # ---------------------------------------------------------
-#   SESSION FACTORY
+# SESSION FACTORY
 # ---------------------------------------------------------
-SessionLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
+)
 
-print("✅ Database connected & models ready")
+print("Database connected and models ready")

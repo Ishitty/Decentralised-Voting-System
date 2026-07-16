@@ -10,6 +10,12 @@ import bcrypt
 import cv2
 import jwt
 import numpy as np
+
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 from flask_cors import CORS
 from web3 import Web3
