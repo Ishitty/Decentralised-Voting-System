@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote Rakshak — Blockchain-Secured Electoral System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --navy:#0d1f4e;
+    --navy-mid:#162766;
+    --navy-dark:#091540;
+    --accent-orange:#e07b22;
+    --accent-green:#2ecc71;
+    --gold:#f5c842;
+    --bg:#eef1f8;
+    --card:#ffffff;
+    --text:#1a1a2e;
+    --muted:#6b7280;
+    --border:#d1d9e6;
+  }
+
+  html{scroll-behavior:smooth}
+
+  body{
+    font-family:'DM Sans',system-ui,sans-serif;
+    background:#fff;color:var(--text);
+    overflow-x:hidden;
+  }
+
+  /* ══════════════════════════════
+     TOP STRIP
+  ══════════════════════════════ */
+  .accent-strip{
+    height:4px;
+    background:linear-gradient(90deg,var(--accent-orange) 0%,var(--accent-orange) 30%,var(--accent-green) 30%,var(--accent-green) 100%);
+  }
+
+  /* ══════════════════════════════
+     NAVBAR
+  ══════════════════════════════ */
+  .navbar{
+    position:sticky;top:0;z-index:100;
+    background:var(--navy);
+    padding:0 48px;height:66px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 2px 20px rgba(0,0,0,.4);
+    transition:background .3s;
+  }
+
+  .navbar.scrolled{background:rgba(9,21,64,.97);backdrop-filter:blur(12px)}
+
+  .nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff}
+  .nav-brand img{width:36px;height:36px;object-fit:contain;filter:brightness(0) invert(1)}
+  .nav-brand-text .t1{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;line-height:1.2;letter-spacing:.01em}
+  .nav-brand-text .t2{font-size:.6rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase}
+
+  .nav-links{display:flex;align-items:center;gap:4px}
+  .nav-links a{
+    color:rgba(255,255,255,.7);text-decoration:none;
+    font-size:.82rem;font-weight:500;padding:7px 16px;
+    border-radius:6px;transition:all .2s;letter-spacing:.02em;cursor:pointer;
+    position:relative;
+  }
+  .nav-links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+  .nav-links a.active{color:#fff;background:rgba(255,255,255,.12)}
+
+  .nav-vote-btn{
+    background:var(--accent-orange);color:#fff !important;
+    font-weight:600 !important;padding:8px 20px !important;
+    border-radius:6px !important;
+    box-shadow:0 2px 10px rgba(224,123,34,.35);
+    transition:background .2s,transform .15s,box-shadow .2s !important;
+  }
+  .nav-vote-btn:hover{
+    background:#c96d1a !important;
+    transform:translateY(-1px);
+    box-shadow:0 4px 16px rgba(224,123,34,.45) !important;
+  }
+
+  /* ══════════════════════════════
+     HERO
+  ══════════════════════════════ */
+  .hero{
+    min-height:92vh;
+    background:var(--navy);
+    position:relative;
+    display:flex;align-items:center;
+    overflow:hidden;
+  }
+
+  /* Geometric background pattern */
+  .hero-bg{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(46,204,113,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 80% at 10% 80%, rgba(224,123,34,.08) 0%, transparent 60%),
+      linear-gradient(135deg, #091540 0%, #0d1f4e 50%, #162766 100%);
+  }
+
+  /* Animated grid lines */
+  .hero-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size:60px 60px;
+  }
+
+  /* Floating circles */
+  .hero-orb{
+    position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;
+  }
+  .orb1{width:400px;height:400px;background:rgba(46,204,113,.08);top:-100px;right:-100px;animation:orbFloat 8s ease-in-out infinite}
+  .orb2{width:300px;height:300px;background:rgba(224,123,34,.07);bottom:-80px;left:10%;animation:orbFloat 10s ease-in-out infinite reverse}
+  .orb3{width:200px;height:200px;background:rgba(245,200,66,.05);top:30%;right:25%;animation:orbFloat 12s ease-in-out infinite 2s}
+
+  @keyframes orbFloat{
+    0%,100%{transform:translateY(0) scale(1)}
+    50%{transform:translateY(-30px) scale(1.05)}
+  }
+
+  .hero-content{
+    position:relative;z-index:2;
+    max-width:1100px;margin:0 auto;
+    padding:80px 48px;
+    display:grid;grid-template-columns:1fr 420px;gap:60px;align-items:center;
+    width:100%;
+  }
+
+  /* India flag stripe decoration */
+  .hero-flag-bar{
+    display:flex;gap:3px;margin-bottom:28px;
+    animation:fadeSlideUp .6s ease both;
+  }
+  .flag-seg{height:4px;border-radius:2px;width:32px}
+  .flag-seg:nth-child(1){background:#FF9933}
+  .flag-seg:nth-child(2){background:#fff;opacity:.5}
+  .flag-seg:nth-child(3){background:#138808}
+
+  .hero-eyebrow{
+    font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent-green);margin-bottom:16px;
+    display:flex;align-items:center;gap:8px;
+    animation:fadeSlideUp .7s ease both .1s;opacity:0;
+  }
+  .hero-eyebrow::before{content:'';width:24px;height:2px;background:var(--accent-green);border-radius:2px}
+
+  .hero-headline{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2.6rem,5vw,4rem);
+    font-weight:900;
+    color:#fff;
+    line-height:1.1;
+    letter-spacing:-.01em;
+    margin-bottom:22px;
+    animation:fadeSlideUp .7s ease both .2s;opacity:0;
+  }
+
+  .hero-headline .accent{
+    background:linear-gradient(90deg, var(--accent-orange), var(--gold));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+
+  .hero-sub{
+    font-size:1.05rem;color:rgba(255,255,255,.65);line-height:1.7;
+    max-width:480px;margin-bottom:36px;font-weight:300;
+    animation:fadeSlideUp .7s ease both .3s;opacity:0;
+  }
+
+  .hero-cta-row{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    animation:fadeSlideUp .7s ease both .4s;opacity:0;
+  }
+
+  .btn-hero-primary{
+    background:var(--accent-orange);color:#fff;border:none;
+    padding:14px 32px;border-radius:7px;font-size:.92rem;font-weight:700;
+    letter-spacing:.04em;cursor:pointer;text-decoration:none;
+    box-shadow:0 4px 20px rgba(224,123,34,.4);
+    transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+    font-family:'DM Sans',sans-serif;
+  }
+  .btn-hero-primary:hover{background:#c96d1a;transform:translateY(-2px);box-shadow:0 6px 24px rgba(224,123,34,.5)}
+
+  .btn-hero-ghost{
+    color:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.2);
+    padding:13px 28px;border-radius:7px;font-size:.88rem;font-weight:500;
+    cursor:pointer;text-decoration:none;background:transparent;
+    transition:all .2s;display:inline-flex;align-items:center;gap:7px;
+    font-family:'DM Sans',sans-serif;
+  }
+  .btn-hero-ghost:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.06)}
+
+  /* Stats row */
+  .hero-stats{
+    display:flex;gap:28px;margin-top:44px;
+    animation:fadeSlideUp .7s ease both .5s;opacity:0;
+  }
+  .hero-stat{border-left:2px solid rgba(255,255,255,.1);padding-left:16px}
+  .hero-stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#fff;line-height:1}
+  .hero-stat-label{font-size:.7rem;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+
+  /* Hero right card */
+  .hero-card{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;padding:28px;
+    backdrop-filter:blur(8px);
+    animation:fadeSlideRight .8s ease both .3s;opacity:0;
+  }
+
+  .hero-card-title{
+    font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:rgba(255,255,255,.4);margin-bottom:18px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .live-dot-small{
+    width:6px;height:6px;border-radius:50%;background:var(--accent-green);
+    box-shadow:0 0 6px var(--accent-green);animation:pulse 1.5s infinite;display:inline-block;
+  }
+
+  .feature-list{display:flex;flex-direction:column;gap:0}
+  .feature-item{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .feature-item:last-child{border-bottom:none}
+  .feature-icon-wrap{
+    width:38px;height:38px;border-radius:8px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.1rem;
+  }
+  .fi-green{background:rgba(46,204,113,.15)}
+  .fi-orange{background:rgba(224,123,34,.15)}
+  .fi-blue{background:rgba(59,130,246,.15)}
+  .fi-gold{background:rgba(245,200,66,.12)}
+
+  .feature-text .ft-title{font-size:.87rem;font-weight:600;color:#fff;margin-bottom:3px}
+  .feature-text .ft-desc{font-size:.73rem;color:rgba(255,255,255,.45);line-height:1.5}
+
+  @keyframes fadeSlideUp{
+    from{opacity:0;transform:translateY(24px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes fadeSlideRight{
+    from{opacity:0;transform:translateX(24px)}
+    to{opacity:1;transform:translateX(0)}
+  }
+
+  /* ══════════════════════════════
+     HOW IT WORKS
+  ══════════════════════════════ */
+  .section{padding:88px 48px;max-width:1100px;margin:0 auto}
+
+  .section-tag{
+    font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent-orange);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-tag::before{content:'';width:20px;height:2px;background:var(--accent-orange);border-radius:2px}
+
+  .section-title{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.8rem,3vw,2.5rem);
+    font-weight:700;color:var(--navy);
+    margin-bottom:12px;line-height:1.2;
+  }
+  .section-sub{font-size:.95rem;color:var(--muted);max-width:500px;line-height:1.7;margin-bottom:52px}
+
+  /* Steps */
+  .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+
+  .step-card{
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    padding:28px 24px;position:relative;overflow:hidden;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .step-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(13,31,78,.1)}
+
+  .step-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent-orange),var(--accent-green));
+  }
+
+  .step-number{
+    font-family:'Playfair Display',serif;
+    font-size:3rem;font-weight:900;
+    color:rgba(13,31,78,.06);
+    position:absolute;top:16px;right:20px;line-height:1;
+  }
+
+  .step-icon{
+    width:48px;height:48px;border-radius:10px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+    margin-bottom:16px;
+  }
+  .step-title{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:8px}
+  .step-desc{font-size:.82rem;color:var(--muted);line-height:1.65}
+
+  /* ══════════════════════════════
+     FEATURES BAND
+  ══════════════════════════════ */
+  .features-band{
+    background:var(--navy);
+    padding:80px 48px;
+  }
+  .features-inner{max-width:1100px;margin:0 auto}
+  .features-band .section-title{color:#fff}
+  .features-band .section-sub{color:rgba(255,255,255,.5)}
+  .features-band .section-tag{color:var(--accent-green)}
+  .features-band .section-tag::before{background:var(--accent-green)}
+
+  .features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+
+  .feat-card{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;padding:22px 18px;
+    transition:background .2s,transform .2s;
+  }
+  .feat-card:hover{background:rgba(255,255,255,.07);transform:translateY(-3px)}
+
+  .feat-icon{font-size:1.5rem;margin-bottom:12px}
+  .feat-title{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:8px}
+  .feat-desc{font-size:.76rem;color:rgba(255,255,255,.45);line-height:1.6}
+
+  /* ══════════════════════════════
+     BLOCKCHAIN SECTION
+  ══════════════════════════════ */
+  .blockchain-section{
+    padding:88px 48px;
+    background:var(--bg);
+  }
+  .blockchain-inner{
+    max-width:1100px;margin:0 auto;
+    display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+  }
+
+  .blockchain-visual{
+    background:var(--navy);border-radius:14px;padding:28px;
+    position:relative;overflow:hidden;
+  }
+  .blockchain-visual::before{
+    content:'';position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .block-chain-vis{display:flex;flex-direction:column;gap:0;position:relative;z-index:1}
+  .block-item{
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    border-radius:8px;padding:12px 16px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .block-hash{font-family:monospace;font-size:.7rem;color:var(--accent-green);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .block-time{font-size:.65rem;color:rgba(255,255,255,.3)}
+  .block-connector{
+    width:2px;height:16px;background:linear-gradient(var(--accent-green),rgba(46,204,113,.2));
+    margin:0 auto;
+  }
+  .block-icon-sm{font-size:.9rem}
+
+  /* ══════════════════════════════
+     CTA SECTION
+  ══════════════════════════════ */
+  .cta-section{
+    padding:88px 48px;
+    background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-mid) 100%);
+    text-align:center;position:relative;overflow:hidden;
+  }
+  .cta-section::before{
+    content:'';position:absolute;inset:0;
+    background-image:radial-gradient(rgba(46,204,113,.1) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  .cta-inner{position:relative;z-index:1}
+  .cta-title{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.8rem,3.5vw,3rem);font-weight:900;
+    color:#fff;margin-bottom:16px;
+  }
+  .cta-sub{font-size:1rem;color:rgba(255,255,255,.55);margin-bottom:36px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7}
+  .cta-btns{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+
+  /* ══════════════════════════════
+     FOOTER
+  ══════════════════════════════ */
+  .site-footer{
+    background:var(--navy-dark);
+    padding:40px 48px 24px;
+  }
+  .footer-top{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:32px;flex-wrap:wrap;padding-bottom:32px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    margin-bottom:20px;
+  }
+  .footer-brand{display:flex;align-items:center;gap:12px}
+  .footer-brand img{width:36px;height:36px;object-fit:contain;filter:brightness(0) invert(1);opacity:.7}
+  .footer-brand-text .t1{font-family:'Playfair Display',serif;font-size:.95rem;color:rgba(255,255,255,.8);font-weight:700}
+  .footer-brand-text .t2{font-size:.65rem;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase}
+  .footer-links-row{display:flex;gap:24px}
+  .footer-links-row a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.78rem;transition:color .2s;cursor:pointer}
+  .footer-links-row a:hover{color:rgba(255,255,255,.8)}
+  .footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .footer-copy{font-size:.7rem;color:rgba(255,255,255,.25)}
+
+  /* ══════════════════════════════
+     SCROLL REVEAL
+  ══════════════════════════════ */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.visible{opacity:1;transform:none}
+
+  /* ══════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════ */
+  @media(max-width:900px){
+    .hero-content{grid-template-columns:1fr;gap:40px}
+    .hero-card{display:none}
+    .steps-grid{grid-template-columns:1fr}
+    .features-grid{grid-template-columns:1fr 1fr}
+    .blockchain-inner{grid-template-columns:1fr}
+    .blockchain-visual{order:-1}
+  }
+  @media(max-width:600px){
+    .navbar{padding:0 20px}
+    .section,.features-band,.blockchain-section,.cta-section{padding-left:20px;padding-right:20px}
+    .hero-content{padding:60px 20px}
+    .features-grid{grid-template-columns:1fr}
+    .site-footer{padding:32px 20px 16px}
+    .hero-stats{gap:18px}
+    .nav-links a:not(.nav-vote-btn){display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP STRIP -->
+<div class="accent-strip"></div>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar" id="navbar">
+  <a class="nav-brand" href="#">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="Emblem of India">
+    <div class="nav-brand-text">
+      <div class="t1">Vote Rakshak</div>
+      <div class="t2">Blockchain Electoral System</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a class="active" href="#">Home</a>
+    <a href="/results">Results</a>
+    <a href="/candidate">Candidates</a>
+    <a href="/admin">Admin</a>
+    <a class="nav-vote-btn" href="/voter">→ Vote Now</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-content">
+    <!-- Left -->
+    <div>
+      <div class="hero-flag-bar">
+        <div class="flag-seg"></div>
+        <div class="flag-seg"></div>
+        <div class="flag-seg"></div>
+      </div>
+
+      <div class="hero-eyebrow">
+        <span class="live-dot-small"></span>
+        Election System Active
+      </div>
+
+      <h1 class="hero-headline">
+        Your Voice.<br>
+        Your <span class="accent">Vote.</span><br>
+        Secured Forever.
+      </h1>
+
+      <p class="hero-sub">
+        Vote Rakshak is India's blockchain-powered electoral platform — every vote is immutable, transparent, and verified with biometric face authentication. Democracy, reimagined.
+      </p>
+
+      <div class="hero-cta-row">
+        <a class="btn-hero-primary" href="/voter">
+          🗳️ &nbsp;Cast Your Vote
+        </a>
+        <a class="btn-hero-ghost" href="/results">
+          📊 &nbsp;View Live Results
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="hStatVoters">—</div>
+          <div class="hero-stat-label">Voters Enrolled</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="hStatCandidates">—</div>
+          <div class="hero-stat-label">Candidates</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="hStatVotes">—</div>
+          <div class="hero-stat-label">Votes Cast</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right card -->
+    <div class="hero-card">
+      <div class="hero-card-title">
+        System Features
+        <span><span class="live-dot-small"></span> &nbsp;Online</span>
+      </div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon-wrap fi-green">🔗</div>
+          <div class="feature-text">
+            <div class="ft-title">Blockchain Immutability</div>
+            <div class="ft-desc">Each vote recorded as an immutable transaction on Ethereum smart contracts</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon-wrap fi-orange">🪪</div>
+          <div class="feature-text">
+            <div class="ft-title">Biometric Verification</div>
+            <div class="ft-desc">Face recognition via MediaPipe ensures only registered voters can cast ballots</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon-wrap fi-blue">📊</div>
+          <div class="feature-text">
+            <div class="ft-title">Real-time Transparency</div>
+            <div class="ft-desc">Live results visible to all — no waiting until polls close</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon-wrap fi-gold">🛡️</div>
+          <div class="feature-text">
+            <div class="ft-title">Double-vote Prevention</div>
+            <div class="ft-desc">Smart contracts enforce one vote per enrollment — cryptographically guaranteed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section style="background:#fff;padding:88px 0">
+  <div class="section" style="padding-top:0;padding-bottom:0">
+    <div class="reveal">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-title">Three steps to cast your vote</h2>
+      <p class="section-sub">Simple, secure, and takes under a minute. Your identity is verified before you vote.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <div class="step-icon">🪪</div>
+        <div class="step-title">Enter Your Enrollment</div>
+        <div class="step-desc">Type your unique enrollment number assigned during voter registration. This links your identity to the voting session.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <div class="step-icon">📸</div>
+        <div class="step-title">Face Verification</div>
+        <div class="step-desc">Your face is captured via webcam and matched against your registered biometric profile using MediaPipe AI.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <div class="step-icon">🗳️</div>
+        <div class="step-title">Select & Submit</div>
+        <div class="step-desc">Choose your candidate and submit. Your vote is written to the Ethereum blockchain as a tamper-proof transaction.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES BAND ── -->
+<div class="features-band">
+  <div class="features-inner">
+    <div class="reveal">
+      <div class="section-tag">Why Vote Rakshak</div>
+      <h2 class="section-title">Built for trust, security & transparency</h2>
+      <p class="section-sub">Every layer of the system is designed to prevent fraud and protect voter privacy.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feat-card">
+        <div class="feat-icon">⛓️</div>
+        <div class="feat-title">Ethereum Smart Contracts</div>
+        <div class="feat-desc">Votes are stored using Solidity contracts deployed via Truffle — no central authority can alter them.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">AI Face Recognition</div>
+        <div class="feat-desc">MediaPipe FaceMesh with 468 landmark points ensures only the registered voter is present at voting time.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔐</div>
+        <div class="feat-title">JWT Admin Auth</div>
+        <div class="feat-desc">Admin portal protected by token-based authentication — all admin actions are logged and auditable.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📡</div>
+        <div class="feat-title">Decentralised Ledger</div>
+        <div class="feat-desc">Votes propagate across the Ethereum network via MetaMask and Ganache — no single point of failure.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BLOCKCHAIN VISUAL ── -->
+<div class="blockchain-section">
+  <div class="blockchain-inner">
+    <div class="reveal">
+      <div class="section-tag">Blockchain</div>
+      <h2 class="section-title">Every vote is a block on the chain</h2>
+      <p class="section-sub">Once submitted, your vote is hashed and appended to an ever-growing, immutable chain of records. Nobody — not even the admin — can change it.</p>
+      <a class="btn-hero-primary" href="/voter" style="display:inline-flex;margin-top:8px;font-size:.85rem;padding:12px 24px">
+        🗳️ &nbsp;Cast Your Vote Now
+      </a>
+    </div>
+    <div class="blockchain-visual reveal">
+      <div style="font-size:.65rem;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Live Vote Ledger</div>
+      <div class="block-chain-vis" id="blockVis">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Ready to make your voice heard?</h2>
+    <p class="cta-sub">Your vote is protected by cryptography, verified by AI, and recorded forever on the blockchain.</p>
+    <div class="cta-btns">
+      <a class="btn-hero-primary" href="/voter">🗳️ &nbsp;Vote Now</a>
+      <a class="btn-hero-ghost" href="/candidate">View Candidates →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/500px-Emblem_of_India.svg.png" alt="Emblem">
+      <div class="footer-brand-text">
+        <div class="t1">Vote Rakshak</div>
+        <div class="t2">Government of India &nbsp;·&nbsp; 2026</div>
+      </div>
+    </div>
+    <div class="footer-links-row">
+      <a href="/voter">Vote</a>
+      <a href="/results">Results</a>
+      <a href="/candidate">Candidates</a>
+      <a href="/admin">Admin Login</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Help</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Vote Rakshak · Blockchain-Secured Electoral System · Government of India</span>
+    <span class="footer-copy">Built with Ethereum · Solidity · Flask · MediaPipe</span>
+  </div>
+</footer>
+
+<script>
+// ── NAVBAR SCROLL ──
+window.addEventListener("scroll", () => {
+  document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 40);
+});
+
+// ── SCROLL REVEAL ──
+const revealEls = document.querySelectorAll(".reveal");
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if(e.isIntersecting){
+      setTimeout(() => e.target.classList.add("visible"), i * 80);
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => observer.observe(el));
+
+// ── LIVE STATS from API ──
+async function loadStats(){
+  try {
+    const r = await fetch("/candidates");
+    const data = await r.json();
+    document.getElementById("hStatCandidates").textContent = data.length;
+    document.getElementById("hStatVotes").textContent = data.reduce((a,c) => a+c.votes, 0);
+  } catch(e){}
+
+  // Only fetch voter count if admin is logged in, otherwise show —
+  const token = localStorage.getItem("admin_token");
+  if(!token){ document.getElementById("hStatVoters").textContent = "—"; return; }
+
+  try {
+    const r2 = await fetch("/admin/voters", { headers:{ Authorization:"Bearer " + token } });
+    if(r2.ok){
+      const v = await r2.json();
+      document.getElementById("hStatVoters").textContent = v.length;
+    } else {
+      document.getElementById("hStatVoters").textContent = "—";
+    }
+  } catch(e){ document.getElementById("hStatVoters").textContent = "—"; }
+}
+// async function loadStats(){
+//   try {
+//     const r = await fetch("/candidates");
+//     const data = await r.json();
+//     document.getElementById("hStatCandidates").textContent = data.length;
+//     document.getElementById("hStatVotes").textContent = data.reduce((a,c) => a+c.votes, 0);
+//   } catch(e){}
+
+//   try {
+//     const r2 = await fetch("/admin/voters", { headers:{ Authorization:"Bearer " + localStorage.getItem("admin_token") } });
+//     if(r2.ok){
+//       const v = await r2.json();
+//       document.getElementById("hStatVoters").textContent = v.length;
+//     } else {
+//       document.getElementById("hStatVoters").textContent = "—";
+//     }
+//   } catch(e){ document.getElementById("hStatVoters").textContent = "—"; }
+// }
+loadStats();
+
+// ── ANIMATED BLOCKCHAIN VISUAL ──
+const hashes = [
+  "0x3f2a1b9e…d4c7",
+  "0xa8f01c3d…e291",
+  "0x7d4e9b2a…f803",
+  "0x1c6f3a8d…a054",
+  "0x9e2b7c1f…3d6e",
+];
+const times = ["Just now","2m ago","5m ago","11m ago","18m ago"];
+const box = document.getElementById("blockVis");
+
+hashes.forEach((h, i) => {
+  if(i > 0){
+    const conn = document.createElement("div");
+    conn.className = "block-connector";
+    box.appendChild(conn);
+  }
+  const item = document.createElement("div");
+  item.className = "block-item";
+  item.style.animationDelay = (i * 0.15) + "s";
+  item.innerHTML = `
+    <span class="block-icon-sm">🔗</span>
+    <span class="block-hash">${h}</span>
+    <span class="block-time">${times[i]}</span>`;
+  box.appendChild(item);
+});
+</script>
+</body>
+</html>
