@@ -16,8 +16,36 @@
       "destination": "https://decentralised-voting-system.onrender.com/voting_status"
     },
     {
-      "source": "/admin/:path*",
-      "destination": "https://decentralised-voting-system.onrender.com/admin/:path*"
+      "source": "/admin/login_step1",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/login_step1"
+    },
+    {
+      "source": "/admin/login_face",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/login_face"
+    },
+    {
+      "source": "/admin/add_candidate",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/add_candidate"
+    },
+    {
+      "source": "/admin/voters",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/voters"
+    },
+    {
+      "source": "/admin/register_voter_camera",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/register_voter_camera"
+    },
+    {
+      "source": "/admin/set_voting_session",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/set_voting_session"
+    },
+    {
+      "source": "/admin/clear_voting_session",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/clear_voting_session"
+    },
+    {
+      "source": "/admin/delete_voter/:id",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/delete_voter/:id"
     }
   ]
 }
