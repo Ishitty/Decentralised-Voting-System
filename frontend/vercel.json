@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+
+  "rewrites": [
+    {
+      "source": "/candidates",
+      "destination": "https://decentralised-voting-system.onrender.com/candidates"
+    },
+    {
+      "source": "/vote",
+      "destination": "https://decentralised-voting-system.onrender.com/vote"
+    },
+    {
+      "source": "/voting_status",
+      "destination": "https://decentralised-voting-system.onrender.com/voting_status"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://decentralised-voting-system.onrender.com/admin/:path*"
+    }
+  ]
+}
