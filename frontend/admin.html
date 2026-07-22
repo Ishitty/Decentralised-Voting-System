@@ -242,8 +242,8 @@
     </div>
     <div style="overflow-x:auto">
       <table class="data-table">
-        <thead><tr><th style="width:60px">ID</th><th>Name</th><th style="width:110px">Votes</th><th style="width:90px">Action</th></tr></thead>
-        <tbody id="candTable"><tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr></tbody>
+        <thead><tr><th style="width:60px">ID</th><th>Name</th><th style="width:110px">Votes</th></tr></thead>
+        <tbody id="candTable"><tr><td colspan="3"><div class="empty-state">Loading…</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -273,19 +273,22 @@
 
 <script>
 const token = localStorage.getItem("admin_token");
-if (!token) { alert("Admin login required"); window.location.href = "/admin"; }
+if (!token) {
+  alert("Admin login required");
+  window.location.href = "/admin_login";
+}
 
 function goHome()   { window.location.href = "/"; }
 function goResults(){ window.location.href = "/results"; }
-function goRegisterVoter(){ window.location.href = "/register-voter?token=" + token; }
-function logout(){ localStorage.removeItem("admin_token"); window.location.href = "/admin"; }
+function goRegisterVoter(){ window.location.href = "/register_voter?token=" + encodeURIComponent(token); }
+function logout(){ localStorage.removeItem("admin_token"); window.location.href = "/admin_login"; }
 
 function handleExpired(){
   clearInterval(window._candInterval);
   clearInterval(window._voterInterval);
   clearInterval(window._sessionInterval);
   localStorage.removeItem("admin_token");
-  window.location.href = "/admin?expired=1";
+  window.location.href = "/admin_login?expired=1";
 }
 
 function setMsg(id, text, type){
@@ -532,17 +535,16 @@ async function loadCandidates(){
     document.getElementById("candCount").textContent = data.length + " total";
 
     if(!data.length){
-      document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No candidates yet</div></td></tr>'; return;
+      document.getElementById("candTable").innerHTML = '<tr><td colspan="3"><div class="empty-state">No candidates yet</div></td></tr>'; return;
     }
     document.getElementById("candTable").innerHTML = data.map(c => `
       <tr>
         <td><span class="id-badge">${c.id}</span></td>
         <td style="font-weight:600;color:var(--navy)">${c.name}</td>
         <td><span class="vote-count">${c.votes}</span></td>
-        <td><button class="btn-danger" onclick="deleteCandidate(${c.id})">🗑 Delete</button></td>
       </tr>`).join("");
   } catch(e){
-    document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">Failed to load</div></td></tr>';
+    document.getElementById("candTable").innerHTML = '<tr><td colspan="3"><div class="empty-state">Failed to load</div></td></tr>';
   }
 }
 
@@ -555,7 +557,7 @@ async function loadCandidates(){
 //     document.getElementById("candCount").textContent = data.length + " total";
 
 //     if(!data.length){
-//       document.getElementById("candTable").innerHTML = '<tr><td colspan="4"><div class="empty-state">No candidates yet</div></td></tr>'; return;
+//       document.getElementById("candTable").innerHTML = '<tr><td colspan="3"><div class="empty-state">No candidates yet</div></td></tr>'; return;
 //     }
 //     document.getElementById("candTable").innerHTML = data.map(c => `
 //       <tr>
